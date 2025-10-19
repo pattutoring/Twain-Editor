@@ -9,12 +9,14 @@ body { font-family: "Courier New", monospace; background: #fdf6e3; margin: 20px;
 h1 { text-align: center; font-size: 2.5em; margin-bottom: 20px; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
 .editor-container { max-width: 900px; margin:auto; background:#fdf6e3; padding:0; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.1); display:flex; }
 .line-numbers { background:#eee; padding:10px 5px; text-align:right; user-select:none; color:#666; font-size:16px; line-height:1.5; }
-#editor { flex:1; min-height:500px; font-family:"Courier New", monospace; font-size:16px; padding:15px; border:none; line-height:1.5; white-space:pre-wrap; outline:none; caret-color:black; position:relative; }
+#editor { flex:1; min-height:500px; font-family:"Courier New", monospace; font-size:16px; padding:15px; border:none; line-height:1.5; white-space:pre-wrap; outline:none; position:relative; caret-color:black; }
 #editor:focus { outline:none; }
+#editor:empty:before { content: attr(data-placeholder); color: #999; }
 #feedback { margin-top:20px; font-style:italic; padding:15px; border-radius:8px; max-width:900px; margin-left:auto; margin-right:auto; }
 button { margin-top:10px; padding:10px 20px; font-size:16px; cursor:pointer; background:#0074D9; color:white; border:none; border-radius:8px; transition:0.2s; }
 button:hover { background:#005fa3; }
 
+/* Rule highlights */
 .rule-0 { background-color: rgba(255,0,0,0.3); }
 .rule-1 { background-color: rgba(255,165,0,0.3); }
 .rule-2 { background-color: rgba(255,255,0,0.3); }
@@ -26,20 +28,20 @@ button:hover { background:#005fa3; }
 .rule-8 { text-decoration: underline red; } 
 .rule-9 { background-color: rgba(128,128,0,0.3); }
 .rule-10 { background-color: rgba(0,128,128,0.3); } 
+.rule-11 { background-color: rgba(200,200,0,0.3); }
 .tooltip { position:relative; cursor:help; }
 .tooltip:hover::after { content: attr(data-tooltip); position:absolute; background:#333; color:#fff; padding:3px 8px; border-radius:4px; top:-25px; left:0; white-space:nowrap; font-size:12px; z-index:10; }
 
-/* Typewriter caret */
+/* Typewriter block cursor */
 @keyframes blink { 0%,50%,100% {opacity:1;} 25%,75% {opacity:0;} }
-#editor::after { content:""; display:inline-block; width:1px; background:black; animation:blink 1s step-end infinite; position:absolute; pointer-events:none; }
-
+#editor-caret { display:inline-block; width:8px; background:black; animation:blink 1s step-end infinite; vertical-align:text-bottom; }
 </style>
 </head>
 <body>
 <h1>Twain Editor</h1>
 <div class="editor-container">
   <div class="line-numbers" id="lineNumbers">1</div>
-  <div id="editor" contenteditable="true" spellcheck="false"></div>
+  <div id="editor" contenteditable="true" spellcheck="false" data-placeholder="Write like Mark Twain..."></div>
 </div>
 <div style="display:flex; justify-content:space-between; max-width:900px; margin:auto; margin-top:10px;">
   <p id="wordCount">Word count: 0</p>
@@ -58,9 +60,10 @@ const dictionary = new Set([
   "than","first","water","been","call","who","oil","its","now","find","long","down","day","did","get","come",
   "made","may","part","plain","simple","language","short","words","brief","sentences","almost","right",
   "very","damn","redundant","unnecessary","superfluous","obfuscates","exaggeration","alliteration","comparison",
-  "cliche","spelling","error","yellow","green","blue","red","orange","purple"
+  "cliche","spelling","error","yellow","green","blue","red","orange","purple","hello","before","mark","twain"
 ]);
 
+// Rules
 const rules = [
   { regex: /\b(utilize|commence|ascertain|ameliorate|endeavor|employ|emolument)\b/gi, message:"Never use a five-dollar word when a fifty-cent one suffices, dear friend.", color:0 },
   { regex: /\b\w+ly\b/gi, message:"Twain frowns upon adjectives and adverbs: keep it simple!", color:1 },
@@ -152,7 +155,7 @@ function highlightText(){
   editor.innerHTML=html.replace(/\n/g,'<br>');
   updateLineNumbers(text);
 
-  feedbackDiv.innerHTML=annotations.map(a=>`<div style="background-color: rgba(${a.color*20},${255-a.color*20},${a.color*10},0.3); padding:3px 5px; margin-bottom:2px;">${a.message}: ${a.text}</div>`).join('');
+  feedbackDiv.innerHTML=annotations.map(a=>`<div style="background-color: rgba(${a.color*20},${255-a.color*20},${a.color*10},0.3); padding:3px 5px; margin-bottom:2px;">${a.message} ➤ ${a.text}</div>`).join('');
   wordCountP.textContent="Word count: "+(text.trim()?text.trim().split(/\s+/).length:0);
 
   restoreCaret(editor,caretPos);
