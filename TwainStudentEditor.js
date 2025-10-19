@@ -10,22 +10,26 @@ export default function TwainStudentEditor() {
       test: (t) => /\b(utilize|commence|ascertain|ameliorate|endeavor)\b/i.test(t),
       message:
         "Try simpler words — Twain advised: 'Use plain, simple language, short words, and brief sentences.'",
+      highlight: /\b(utilize|commence|ascertain|ameliorate|endeavor)\b/gi
     },
     {
       rule: "Avoid needless adjectives.",
       test: (t) => /\b\w+ly\b/.test(t),
       message: "Beware of too many adverbs or adjectives — Twain warned against 'adjectivitis.'",
+      highlight: /\b\w+ly\b/g
     },
     {
       rule: "Be concise — avoid unnecessary words.",
       test: (t) => t.split(" ").length > 150,
       message:
         "This passage might be too long — Twain said, 'When you catch an adjective, kill it.'",
+      highlight: null
     },
     {
       rule: "Show, don't tell — avoid clichés.",
       test: (t) => /\b(once in a lifetime|at the end of the day|in the nick of time)\b/i.test(t),
       message: "Replace clichés with vivid imagery — Twain valued originality.",
+      highlight: /\b(once in a lifetime|at the end of the day|in the nick of time)\b/gi
     },
   ];
 
@@ -36,9 +40,20 @@ export default function TwainStudentEditor() {
 
   const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
 
+  // Highlight the text based on rules
+  const getHighlightedText = () => {
+    let highlighted = text;
+    rules.forEach(r => {
+      if (r.highlight) {
+        highlighted = highlighted.replace(r.highlight, match => `<span class="highlight">${match}</span>`);
+      }
+    });
+    return highlighted;
+  };
+
   return React.createElement(
     "div",
-    { className: "bg-white rounded-2xl shadow-lg p-6 w-full" },
+    null,
     React.createElement("textarea", {
       placeholder: "Write like Twain would...",
       value: text,
@@ -46,19 +61,13 @@ export default function TwainStudentEditor() {
     }),
     React.createElement(
       "div",
-      { className: "flex justify-between items-center mt-3" },
-      React.createElement("p", { className: "text-gray-600 text-sm" },
-        "Word count: ", React.createElement("span", { className: "font-semibold" }, wordCount)
-      ),
+      { style: { display: "flex", justifyContent: "space-between", marginTop: "10px" } },
+      React.createElement("p", null, "Word count: ", wordCount),
       React.createElement("button", { onClick: analyze }, "Analyze")
     ),
     feedback.length > 0 && React.createElement(
       "div",
-      { className: "mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4" },
-      React.createElement("h2", null, "Twain’s Suggestions:"),
-      React.createElement("ul", null,
-        feedback.map((f, i) => React.createElement("li", { key: i }, f.message))
-      )
+      { className: "feedback", dangerouslySetInnerHTML: { __html: feedback.map(f => f.message).join("<br>") } }
     ),
     feedback.length === 0 && text.length > 0 && React.createElement(
       "p",
