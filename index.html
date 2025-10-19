@@ -1,115 +1,132 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Twain Editor</title>
-  <style>
-    body {
-      font-family: "Courier New", Courier, monospace;
-      margin: 40px;
-      background-color: #fdf6e3; /* parchment background */
-      color: #333;
-    }
+<meta charset="UTF-8">
+<title>Twain Editor</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  body {
+    font-family: "Courier New", Courier, monospace;
+    margin: 20px;
+    background-color: #fdf6e3;
+    color: #333;
+  }
 
-    h1 {
-      text-align: center;
-      font-family: "Courier New", Courier, monospace;
-      font-size: 3em;
-      margin-bottom: 30px;
-      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-    }
+  h1 {
+    text-align: center;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+  }
 
-    #editor-container {
-      margin: 20px auto;
-      max-width: 900px;
-      background-color: #fff; /* white editor box */
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-    }
+  #editor-container {
+    margin: 0 auto;
+    max-width: 900px;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+  }
 
-    .editor {
-      width: 100%;
-      min-height: 500px;
-      font-family: "Courier New", Courier, monospace;
-      font-size: 18px;
-      line-height: 1.5;
-      padding: 15px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      outline: none;
-      caret-color: black;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-    }
+  .editor-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+  }
 
-    .highlight {
-      font-weight: bold;
-      cursor: help;
-    }
+  .line-numbers {
+    width: 40px;
+    background: #f0f0f0;
+    text-align: right;
+    padding-right: 5px;
+    user-select: none;
+    font-size: 16px;
+    line-height: 1.5;
+  }
 
-    .fancy-word { background-color: #ffe4e1; }
-    .adjective { background-color: #fffacd; }
-    .cliche { background-color: #e0ffff; }
-    .comparison { background-color: #f0fff0; }
-    .very-word { background-color: #f5f5dc; }
-    .preposition { background-color: #fafad2; }
-    .alliteration { background-color: #f0f8ff; }
-    .redundant { background-color: #ffe4b5; }
-    .rhetorical { background-color: #ffe0e0; }
-    .exaggeration { background-color: #e6e6fa; }
-    .almost-right { background-color: #d8bfd8; }
-    .spell-error { background-color: #ffcccc; text-decoration: underline wavy red; }
+  .editor {
+    flex: 1;
+    min-height: 500px;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 16px;
+    line-height: 1.5;
+    padding: 10px 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    outline: none;
+    caret-color: black;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-y: auto;
+  }
 
-    button {
-      margin-top: 10px;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      background-color: #0074D9;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      transition: background 0.2s ease;
-    }
+  .highlight { font-weight: bold; cursor: help; }
+  .fancy-word { background-color: #ffe4e1; }
+  .adjective { background-color: #fffacd; }
+  .cliche { background-color: #e0ffff; }
+  .comparison { background-color: #f0fff0; }
+  .very-word { background-color: #f5f5dc; }
+  .preposition { background-color: #fafad2; }
+  .alliteration { background-color: #f0f8ff; }
+  .redundant { background-color: #ffe4b5; }
+  .rhetorical { background-color: #ffe0e0; }
+  .exaggeration { background-color: #e6e6fa; }
+  .almost-right { background-color: #d8bfd8; }
+  .spell-error { background-color: #ffcccc; text-decoration: underline wavy red; }
 
-    button:hover {
-      background-color: #005fa3;
-    }
+  button {
+    margin-top: 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #0074D9;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    transition: background 0.2s ease;
+  }
 
-    .feedback {
-      margin-top: 20px;
-      font-style: italic;
-      color: #555;
-      background-color: #fff8d6;
-      padding: 15px;
-      border-left: 4px solid #ffcc00;
-      border-radius: 8px;
-    }
+  button:hover { background-color: #005fa3; }
 
-    [title] {
-      position: relative;
-    }
+  .feedback {
+    margin-top: 20px;
+    font-style: italic;
+    color: #555;
+    background-color: #fff8d6;
+    padding: 15px;
+    border-left: 4px solid #ffcc00;
+    border-radius: 8px;
+  }
 
-    [title]:hover::after {
-      content: attr(title);
-      position: absolute;
-      background: #333;
-      color: #fff;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 14px;
-      white-space: nowrap;
-      top: -1.5em;
-      left: 0;
-      z-index: 10;
-    }
-  </style>
+  [title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    background: #333;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 14px;
+    white-space: nowrap;
+    top: -1.5em;
+    left: 0;
+    z-index: 10;
+  }
+
+  @media (max-width: 600px) {
+    .editor-wrapper { flex-direction: column; }
+    .line-numbers { display: none; }
+  }
+</style>
 </head>
 <body>
-  <h1>Twain Editor</h1>
-  <div id="editor-container"></div>
-  <script type="module" src="index.js"></script>
+<h1>Twain Editor</h1>
+<div id="editor-container"></div>
+<script type="module" src="index.js"></script>
+</body>
+</html>
+
 </body>
 </html>
 
