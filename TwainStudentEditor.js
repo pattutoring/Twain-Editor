@@ -1,6 +1,6 @@
 import React, { useState } from "https://esm.sh/react";
 
-export default function TwainStudentEditor({ title }) {
+export default function TwainStudentEditor() {
   const [text, setText] = useState("");
   const [feedback, setFeedback] = useState([]);
 
@@ -39,9 +39,7 @@ export default function TwainStudentEditor({ title }) {
   return React.createElement(
     "div",
     { className: "bg-white rounded-2xl shadow-lg p-6 w-full" },
-    React.createElement("h1", { className: "text-2xl font-bold mb-4 text-center" }, title),
     React.createElement("textarea", {
-      className: "w-full h-64 p-3 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none",
       placeholder: "Write like Twain would...",
       value: text,
       onChange: (e) => setText(e.target.value)
@@ -52,16 +50,13 @@ export default function TwainStudentEditor({ title }) {
       React.createElement("p", { className: "text-gray-600 text-sm" },
         "Word count: ", React.createElement("span", { className: "font-semibold" }, wordCount)
       ),
-      React.createElement("button", {
-        onClick: analyze,
-        className: "bg-blue-500 text-white px-4 py-2 rounded-xl hover:bg-blue-600 transition"
-      }, "Analyze")
+      React.createElement("button", { onClick: analyze }, "Analyze")
     ),
     feedback.length > 0 && React.createElement(
       "div",
       { className: "mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4" },
-      React.createElement("h2", { className: "font-semibold mb-2 text-yellow-800" }, "Twain’s Suggestions:"),
-      React.createElement("ul", { className: "list-disc ml-5 space-y-1 text-yellow-700" },
+      React.createElement("h2", null, "Twain’s Suggestions:"),
+      React.createElement("ul", null,
         feedback.map((f, i) => React.createElement("li", { key: i }, f.message))
       )
     ),
