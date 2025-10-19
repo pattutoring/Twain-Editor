@@ -1,9 +1,9 @@
 import React from "https://esm.sh/react";
-import ReactDOM from "https://esm.sh/react-dom";
+import ReactDOM from "https://esm.sh/react-dom/client";
 import TwainStudentEditor from "./TwainStudentEditor.js";
 
-// Render the Twain Editor
-ReactDOM.render(
-  React.createElement(TwainStudentEditor, { title: "Your Twain Editor" }),
-  document.getElementById("editor-container")
+const container = document.getElementById("editor-container");
+const root = ReactDOM.createRoot(container);
+root.render(
+  React.createElement(TwainStudentEditor, { title: "Your Twain Editor" })
 );
