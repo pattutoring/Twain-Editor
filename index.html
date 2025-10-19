@@ -98,6 +98,7 @@
     border-radius: 8px;
   }
 
+  /* Rule highlight colors */
   .rule-0 { background-color: rgba(255,0,0,0.3); }
   .rule-1 { background-color: rgba(255,165,0,0.3); }
   .rule-2 { background-color: rgba(255,255,0,0.3); }
@@ -107,6 +108,9 @@
   .rule-6 { background-color: rgba(128,0,128,0.3); }
   .rule-7 { background-color: rgba(255,192,203,0.3); }
   .rule-8 { background-color: rgba(128,128,128,0.3); }
+  .rule-9 { background-color: rgba(0,128,128,0.3); } 
+  .rule-10 { background-color: rgba(128,128,0,0.3); } 
+  .rule-11 { background-color: rgba(255,105,180,0.3); } 
 
   .tooltip {
     position: relative;
@@ -141,32 +145,63 @@
 <div id="feedback" class="feedback"></div>
 
 <script>
+// Spell dictionary (simple example)
+const dictionary = ["the","and","of","to","a","in","is","it","you","that","he","was","for","on","are","as","with","his","they","I","at","be","this","have","from","or","one","had","by","word","but","not","what","all","were","we","when","your","can","said","there","use","an","each","which","she","do","how","their","if","will","up","other","about","out","many","then","them","these","so","some","her","would","make","like","him","into","time","has","look","two","more","write","go","see","number","no","way","could","people","my","than","first","water","been","call","who","oil","its","now","find","long","down","day","did","get","come","made","may","part"]; // expand as needed
+
 const textarea = document.getElementById('editor');
 const highlightDiv = document.getElementById('highlight');
 const feedbackDiv = document.getElementById('feedback');
 const wordCountP = document.getElementById('wordCount');
 
+// Combine original and new rules
 const rules = [
-  { regex: /\b(utilize|commence|ascertain|ameliorate|endeavor|employ)\b/gi, message: "Use simpler words." },
+  { regex: /\b(utilize|commence|ascertain|ameliorate|endeavor|employ|emolument)\b/gi, message: "Use simpler words." },
   { regex: /\b\w+ly\b/gi, message: "Too many adjectives/adverbs." },
   { regex: /\bvery\b/gi, message: "Consider 'damn' instead of 'very'." },
-  { regex: /\balmost right\b/gi, message: "Choose the precise word." },
+  { regex: /\balmost right\b/gi, message: "Choose the precise word (almost right vs right)." },
   { regex: /\b(\w)\w*\s+\1\w*\b/gi, message: "Alliteration detected." },
-  { regex: /\b(once in a lifetime|at the end of the day|in the nick of time|old hat)\b/gi, message: "Replace clichés with original phrasing." },
-  { regex: /\b(redundant|unnecessary|superfluous|obfuscates)\b/gi, message: "Remove redundant words." },
-  { regex: /\?\s*$/g, message: "Rhetorical question detected." },
-  { regex: /\b(nearly|extremely|tremendously|huge|gigantic)\b/gi, message: "Exaggeration detected." }
+  { regex: /\b(once in a lifetime|at the end of the day|in the nick of time|old hat|like a plague)\b/gi, message: "Avoid clichés." },
+  { regex: /\b(redundant|unnecessary|superfluous|obfuscates|more words than necessary)\b/gi, message: "Avoid redundancy." },
+  { regex: /\?\s*$/g, message: "Avoid rhetorical questions." },
+  { regex: /\b(nearly|extremely|tremendously|huge|gigantic)\b/gi, message: "Avoid exaggeration." },
+  { regex: /\b(five-dollar word|fifty-cent word)\b/gi, message: "Don't use a five-dollar word when a fifty-cent word will do." },
+  { regex: /\b(plain, simple language|short words|brief sentences)\b/gi, message: "Prefer plain, simple language, short words, and brief sentences." },
+  { regex: /\b(prepositions at sentence end)\b/gi, message: "Avoid ending sentences with prepositions." }
 ];
 
 function escapeHtml(text) {
   return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
+function spellCheckWords(text) {
+  const words = text.split(/\s+/);
+  let misspell = [];
+  words.forEach(w => {
+    const clean = w.replace(/[^a-zA-Z]/g,'').toLowerCase();
+    if(clean && !dictionary.includes(clean)) misspell.push(w);
+  });
+  return misspell;
+}
+
 function updateHighlight() {
   let text = escapeHtml(textarea.value);
+  let applied = new Set();
+
   rules.forEach((rule, idx) => {
-    text = text.replace(rule.regex, match => `<span class="tooltip rule-${idx}" data-tooltip="${rule.message}">${match}</span>`);
+    text = text.replace(rule.regex, match => {
+      if(applied.has(match)) return match;
+      applied.add(match);
+      return `<span class="tooltip rule-${idx}" data-tooltip="${rule.message}">${match}</span>`;
+    });
   });
+
+  // Spell check highlights
+  const misspelled = spellCheckWords(textarea.value);
+  misspelled.forEach(word => {
+    const regex = new RegExp(`\\b${word}\\b`, 'g');
+    text = text.replace(regex, `<span class="tooltip rule-8" data-tooltip="Spelling mistake">${word}</span>`);
+  });
+
   highlightDiv.innerHTML = text.replace(/\n/g,'<br>');
 }
 
@@ -179,8 +214,10 @@ document.getElementById('analyzeBtn').addEventListener('click', () => {
   let found = [];
   rules.forEach(rule => {
     if(rule.regex.test(textarea.value)) found.push(rule.message);
-    rule.regex.lastIndex = 0; // reset regex state
+    rule.regex.lastIndex = 0;
   });
+  const misspelled = spellCheckWords(textarea.value);
+  misspelled.forEach(w => found.push(`Spelling mistake: ${w}`));
   feedbackDiv.innerHTML = found.length ? found.map(m => `<div>${m}</div>`).join('') : "No issues found — Twain would nod!";
 });
 
