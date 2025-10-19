@@ -1,9 +1,6 @@
 import React, { useState } from "https://esm.sh/react";
 
 export default function TwainStudentEditor({ title }) {
-  
-}
-
   const [text, setText] = useState("");
   const [feedback, setFeedback] = useState([]);
 
