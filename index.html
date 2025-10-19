@@ -6,55 +6,53 @@
   <title>Twain Editor</title>
   <style>
     body {
-      background: #fdf8f0;
-      font-family: "Georgia", serif;
-      color: #2c2c2c;
+      background: #f4f1ea;
+      font-family: Georgia, serif;
       margin: 0;
       padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      color: #222;
     }
 
     h1 {
+      text-align: center;
       font-family: "Georgia", serif;
-      font-weight: 700;
-      font-size: 1.9rem;
-      color: #3c2f2f;
-      margin-top: 1.5rem;
+      font-size: 2rem;
+      margin-top: 1rem;
+    }
+
+    #editor {
+      display: none;
     }
 
     #display {
-      width: 80%;
-      max-width: 720px;
-      min-height: 220px;
-      background-color: #fffdf8;
-      border: 2px solid #e0d6c2;
-      border-radius: 10px;
-      padding: 1.5rem;
+      background: white;
+      color: black;
       font-family: "Courier New", Courier, monospace;
-      font-size: 17px;
+      font-size: 18px;
       line-height: 1.6;
-      color: #1a1a1a;
-      box-shadow: 0 5px 15px rgba(60, 47, 47, 0.15);
-      margin-top: 1.5rem;
-      position: relative;
+      padding: 2rem;
+      width: 85%;
+      max-width: 750px;
+      margin: 2rem auto;
+      border-radius: 8px;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+      min-height: 300px;
       white-space: pre-wrap;
       outline: none;
-      caret-color: transparent;
-      overflow-wrap: break-word;
+      position: relative;
     }
 
     #display::after {
       content: "█";
       position: absolute;
       animation: blink 1s infinite;
-      color: #333;
-      font-weight: bold;
+      color: black;
     }
 
     @keyframes blink {
-      50% { opacity: 0; }
+      50% {
+        opacity: 0;
+      }
     }
 
     .highlight {
@@ -63,23 +61,23 @@
     }
 
     #annotations {
-      width: 80%;
-      max-width: 720px;
-      margin-top: 1rem;
+      max-width: 750px;
+      margin: 1rem auto;
       font-family: "Georgia", serif;
       position: relative;
     }
 
     .annotation {
-      margin: 1rem 0;
-      padding: 0.5rem 0.8rem;
+      margin: 0.8rem 0;
+      padding: 0.5rem 1rem;
       animation: fadeIn 0.8s ease-in-out;
     }
 
     .speech-bubble {
       position: relative;
       border-radius: 12px;
-      padding: 10px 15px;
+      padding: 12px 18px;
+      margin-top: 8px;
       font-style: italic;
       opacity: 0;
       transform: translateY(10px);
@@ -91,43 +89,49 @@
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
     }
 
     @keyframes writeIn {
-      0% { opacity: 0; transform: translateY(10px); }
-      100% { opacity: 1; transform: translateY(0); }
+      0% {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .rules-list {
-      width: 80%;
-      max-width: 720px;
-      background: #fffaf0;
-      border: 1px solid #ddd1b9;
-      border-radius: 8px;
-      padding: 1rem 1.5rem;
-      margin-top: 2rem;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      margin: 2rem auto 3rem;
+      max-width: 750px;
+      background: #faf8f3;
+      border: 1px solid #ddd;
+      padding: 15px 25px;
+      border-radius: 10px;
     }
 
     .rules-list h2 {
       margin-top: 0;
-      font-size: 1.2rem;
-      color: #4a3c2a;
     }
 
     ul {
-      margin: 0.5rem 0;
       padding-left: 1.5rem;
     }
 
     @media (max-width: 600px) {
       #display {
-        font-size: 15px;
+        font-size: 16px;
         padding: 1rem;
         width: 90%;
       }
+
       .rules-list {
         width: 90%;
       }
@@ -136,6 +140,7 @@
 </head>
 <body>
   <h1>Twain Editor</h1>
+  <textarea id="editor" placeholder="Write like Mark Twain..."></textarea>
   <div id="display" contenteditable="true">Write like Mark Twain...</div>
   <div id="annotations"></div>
 
@@ -157,10 +162,10 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
+      const editor = document.getElementById("editor");
       const display = document.getElementById("display");
       const annotations = document.getElementById("annotations");
 
-      // Restore saved text
       const savedText = localStorage.getItem("twainEditorText");
       if (savedText) display.textContent = savedText;
 
