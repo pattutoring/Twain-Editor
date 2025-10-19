@@ -7,7 +7,7 @@
     body {
       font-family: "Courier New", Courier, monospace;
       margin: 40px;
-      background-color: #fdf6e3; /* parchment-like background */
+      background-color: #fdf6e3;
       color: #333;
     }
 
@@ -22,31 +22,30 @@
     #editor-container {
       margin: 20px auto;
       max-width: 900px;
-      background-color: #fffbe6; /* paper background */
+      background-color: #fffbe6;
       padding: 30px;
       border-radius: 12px;
       box-shadow: 0 10px 20px rgba(0,0,0,0.1);
     }
 
-    textarea {
+    .editor {
       width: 100%;
-      height: 500px;
+      min-height: 500px;
       font-family: "Courier New", Courier, monospace;
       font-size: 18px;
-      padding: 15px;
       line-height: 1.5;
+      padding: 15px;
       border: 1px solid #ccc;
       border-radius: 8px;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
-      resize: vertical;
       outline: none;
-      caret-color: #000; /* blinking cursor */
-      animation: blink 1s step-end infinite;
+      caret-color: black;
+      white-space: pre-wrap;
+      word-wrap: break-word;
     }
 
-    @keyframes blink {
-      from, to { caret-color: transparent; }
-      50% { caret-color: black; }
+    .highlight {
+      background-color: #ffebcc;
+      font-weight: bold;
     }
 
     button {
@@ -73,15 +72,6 @@
       padding: 15px;
       border-left: 4px solid #ffcc00;
       border-radius: 8px;
-    }
-
-    .highlight {
-      background-color: #ffebcc; /* highlight words Twain would comment on */
-      font-weight: bold;
-    }
-
-    ul li {
-      margin-bottom: 5px;
     }
   </style>
 </head>
