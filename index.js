@@ -8,3 +8,4 @@ const root = ReactDOM.createRoot(container);
 root.render(
   React.createElement(TwainStudentEditor)
 );
+
