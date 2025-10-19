@@ -72,13 +72,16 @@
 <h1>Twain Editor</h1>
 <div id="editor-container"></div>
 
-<script type="module">
-import React, { useState } from "https://cdn.skypack.dev/react";
-import ReactDOM from "https://cdn.skypack.dev/react-dom";
+<!-- Load React and ReactDOM UMD builds -->
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+<script>
+const e = React.createElement;
 
 function TwainStudentEditor() {
-  const [text, setText] = useState("");
-  const [feedback, setFeedback] = useState([]);
+  const [text, setText] = React.useState("");
+  const [feedback, setFeedback] = React.useState([]);
 
   const rules = [
     { rule: "Avoid fancy words", test: t => /\b(utilize|commence|ascertain|ameliorate|endeavor|employ)\b/i.test(t), message: "Use simpler words." },
@@ -99,31 +102,24 @@ function TwainStudentEditor() {
 
   const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
 
-  return (
-    <div className="editor-container">
-      <textarea
-        placeholder="Write like Twain would..."
-        value={text}
-        onChange={e => setText(e.target.value)}
-      ></textarea>
-
-      <div style={{display:"flex", justifyContent:"space-between", marginTop:"10px"}}>
-        <p>Word count: {wordCount}</p>
-        <button onClick={analyze}>Analyze</button>
-      </div>
-
-      {feedback.length > 0 && (
-        <div className="feedback">
-          {feedback.map((f,i)=><div key={i}>{f.message}</div>)}
-        </div>
-      )}
-    </div>
+  return e('div', { className: 'editor-container' }, 
+    e('textarea', {
+      placeholder: "Write like Twain would...",
+      value: text,
+      onChange: e => setText(e.target.value)
+    }),
+    e('div', { style: { display: "flex", justifyContent: "space-between", marginTop: "10px" } },
+      e('p', null, `Word count: ${wordCount}`),
+      e('button', { onClick: analyze }, 'Analyze')
+    ),
+    feedback.length > 0 && e('div', { className: 'feedback' }, feedback.map((f,i) => e('div', { key:i }, f.message)))
   );
 }
 
-const container = document.getElementById("editor-container");
+const container = document.getElementById('editor-container');
 const root = ReactDOM.createRoot(container);
-root.render(React.createElement(TwainStudentEditor));
+root.render(e(TwainStudentEditor));
 </script>
+
 </body>
 </html>
