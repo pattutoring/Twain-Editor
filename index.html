@@ -28,36 +28,28 @@ button:hover { background:#005fa3; }
 .rule-8 { background-color: rgba(200,200,0,0.3); }
 .rule-9 { background-color: rgba(128,128,0,0.3); }
 .rule-10 { background-color: rgba(0,128,128,0.3); }
+.rule-11 { background-color: rgba(255,105,180,0.3); } /* new color for prepositions */
 
 /* Speech bubbles */
 .twain-bubble {
   position: relative;
-  background: #fef7e2;
   border: 2px solid #000;
   border-radius: 12px;
-  padding: 10px 14px;
+  padding: 10px 14px 12px 14px;
   font-family: "Georgia", serif;
   font-size: 15px;
   line-height: 1.4;
   max-width: 600px;
   margin: auto;
   box-shadow: 3px 3px 0px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
 }
-.twain-bubble::before {
-  content: "“";
-  font-size: 28px;
-  position: absolute;
-  left: 8px;
-  top: -4px;
-  color: #000;
-}
-.twain-bubble::after {
-  content: "”";
-  font-size: 28px;
-  position: absolute;
-  right: 8px;
-  bottom: -8px;
-  color: #000;
+.twain-bubble .quote {
+  font-size: 24px;
+  line-height: 1;
+  margin-top: 2px;
 }
 
 /* Typewriter block cursor */
@@ -105,16 +97,16 @@ button:hover { background:#005fa3; }
 const rules = [
   { regex: /\b(utilize|commence|ascertain|ameliorate|endeavor|employ|emolument)\b/gi, message:"Never use a five-dollar word when a fifty-cent one suffices, dear friend.", color:0 },
   { regex: /\b\w+ly\b/gi, message:"Twain frowns upon adjectives and adverbs: keep it simple!", color:1 },
-  { regex: /\bvery\b/gi, message:"Swap 'very' for 'damn' — but once is plenty, don't overdo it.", color:2 },
+  { regex: /\bvery\b/gi, message:"Swap 'very' for 'damn' — but once is plenty.", color:2 },
   { regex: /\balmost right\b/gi, message:"Choose the precise word — the lightning bug is not lightning.", color:3 },
   { regex: /\b(\w)\w*\s+\1\w*\b/gi, message:"Alliteration! Twain abhors doubling letters for effect.", color:4 },
   { regex: /\b(once in a lifetime|at the end of the day|in the nick of time|old hat|like a plague)\b/gi, message:"Clichés are the death of originality!", color:5 },
   { regex: /\b(redundant|unnecessary|superfluous|obfuscates|more words than necessary)\b/gi, message:"Trim the fluff, my friend. Brevity wins.", color:6 },
-  { regex: /\?\s*$/g, message:"Rhetorical questions? Rarely needed, Twain says.", color:7 },
+  { regex: /\?\s*$/g, message:"Rhetorical questions? Twain rolls his eyes.", color:7 },
   { regex: /\b(nearly|extremely|tremendously|huge|gigantic)\b/gi, message:"Exaggeration detected; less is more.", color:8 },
   { regex: /\b(five-dollar word|fifty-cent word)\b/gi, message:"Use words that carry meaning without pomp.", color:9 },
   { regex: /\b(plain, simple language|short words|brief sentences)\b/gi, message:"Simplicity is the soul of writing.", color:10 },
-  { regex: /\b(prepositions at sentence end)\b/gi, message:"Avoid ending sentences with prepositions!", color:11 }
+  { regex: /\b\w+(?:\s+\w+)*\s+(?:in|on|at|with|from|to|about)\s*$/gim, message:"Avoid ending sentences with prepositions!", color:11 }
 ];
 
 const editor=document.getElementById('editor');
@@ -167,10 +159,16 @@ function highlightText(){
 
   feedbackDiv.innerHTML=[...seenRules].map(color=>{
     const rule=rules.find(r=>r.color===color);
-    return `<div class="twain-bubble" style="background-color: rgba(${color*20},${255-color*20},${color*10},0.15); border-color: rgba(${color*20},${255-color*20},${color*10},0.7);"><strong style="color:rgba(${color*20},${255-color*20},${color*10},1);">Twain says:</strong> ${rule.message}</div>`;
+    const ruleColor=getComputedStyle(document.querySelector(`.rule-${color}`)).backgroundColor;
+    return `<div class="twain-bubble" style="background-color:${ruleColor}; border-color:${ruleColor};">
+      <span class="quote" style="color:${ruleColor};">“</span>
+      <div><strong>Twain says:</strong> ${rule.message}</div>
+      <span class="quote" style="color:${ruleColor};">”</span>
+    </div>`;
   }).join('');
 
   wordCountP.textContent="Word count: "+(text.trim()?text.trim().split(/\s+/).length:0);
+  localStorage.setItem("twainText", text); // Save text
   restoreCaret(editor,caretPos);
 }
 rules.forEach(r=>{
@@ -183,6 +181,12 @@ editor.addEventListener('keydown', e=>{
 });
 editor.addEventListener('input',highlightText);
 document.getElementById('analyzeBtn').addEventListener('click',highlightText);
+
+// Restore saved text
+const savedText = localStorage.getItem("twainText");
+if (savedText) {
+  editor.innerText = savedText;
+}
 highlightText();
 </script>
 </body>
