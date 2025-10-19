@@ -1,211 +1,132 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Write Like Mark Twain</title>
-  <style>
-    body {
-      font-family: "Courier New", monospace;
-      background-color: #f5f2e8;
-      color: #3b2f2f;
-      padding: 20px;
-      line-height: 1.6;
-    }
-
-    h1 {
-      font-family: "Georgia", serif;
-      text-align: center;
-      color: #4b2e05;
-    }
-
-    #editorContainer {
-      position: relative;
-      margin: 20px auto;
-      width: 90%;
-      max-width: 800px;
-    }
-
-    #editor {
-      width: 100%;
-      min-height: 250px;
-      background: #fffaf3;
-      border: 2px solid #a68a64;
-      padding: 10px 50px 10px 60px;
-      resize: vertical;
-      overflow-y: auto;
-      white-space: pre-wrap;
-      font-size: 16px;
-      line-height: 1.6;
-      box-sizing: border-box;
-      outline: none;
-      caret-color: transparent;
-    }
-
-    .cursor {
-      display: inline-block;
-      width: 10px;
-      height: 18px;
-      background-color: #000;
-      margin-left: 2px;
-      animation: blink 1s steps(1) infinite;
-      vertical-align: bottom;
-    }
-
-    @keyframes blink {
-      50% { opacity: 0; }
-    }
-
-    #lineNumbers {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 40px;
-      background-color: #f0e6d2;
-      color: #8b7355;
-      text-align: right;
-      padding: 10px 5px;
-      font-size: 16px;
-      line-height: 1.6;
-      user-select: none;
-      border-right: 1px solid #cbb79e;
-    }
-
-    .highlight-yellow { background-color: #fff59d; }
-    .highlight-pink { background-color: #f8bbd0; }
-    .highlight-green { background-color: #c8e6c9; }
-    .highlight-blue { background-color: #bbdefb; }
-    .highlight-orange { background-color: #ffe0b2; }
-    .highlight-purple { background-color: #e1bee7; }
-
-    .annotation {
-      margin: 10px 0;
-      padding: 8px;
-      border-radius: 8px;
-      font-style: italic;
-      max-width: 80%;
-    }
-
-    .annotation.yellow { background-color: #fff59d; }
-    .annotation.pink { background-color: #f8bbd0; }
-    .annotation.green { background-color: #c8e6c9; }
-    .annotation.blue { background-color: #bbdefb; }
-    .annotation.orange { background-color: #ffe0b2; }
-    .annotation.purple { background-color: #e1bee7; }
-
-    #annotations {
-      margin-top: 20px;
-    }
-
-    #rulesList {
-      margin-top: 30px;
-      background: #fffaf0;
-      padding: 10px;
-      border-left: 4px solid #a67b5b;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Write Like Mark Twain</title>
+<style>
+body{font-family:"Courier New",monospace;background:#f5f2e8;color:#3b2f2f;padding:20px;line-height:1.6}
+h1{font-family:Georgia,serif;text-align:center;color:#4b2e05}
+#editorContainer{position:relative;margin:20px auto;width:90%;max-width:800px}
+#editor{width:100%;min-height:220px;background:#fffaf3;border:2px solid #a68a64;
+padding:10px 50px 10px 60px;resize:vertical;overflow-y:auto;white-space:pre-wrap;
+font-size:16px;line-height:1.6;box-sizing:border-box;outline:none;caret-color:transparent}
+.cursor{display:inline-block;width:10px;height:18px;background:#000;margin-left:2px;
+animation:blink 1s steps(1) infinite;vertical-align:bottom}
+@keyframes blink{50%{opacity:0}}
+#lineNumbers{position:absolute;top:0;left:0;width:40px;background:#f0e6d2;color:#8b7355;
+text-align:right;padding:10px 5px;font-size:16px;line-height:1.6;user-select:none;
+border-right:1px solid #cbb79e}
+.highlight-yellow{background:#fff59d}
+.highlight-pink{background:#f8bbd0}
+.highlight-green{background:#c8e6c9}
+.highlight-blue{background:#bbdefb}
+.highlight-orange{background:#ffe0b2}
+.highlight-purple{background:#e1bee7}
+.annotation{margin:8px 0;padding:8px;border-radius:8px;font-style:italic;max-width:80%}
+.annotation.yellow{background:#fff59d}
+.annotation.pink{background:#f8bbd0}
+.annotation.green{background:#c8e6c9}
+.annotation.blue{background:#bbdefb}
+.annotation.orange{background:#ffe0b2}
+.annotation.purple{background:#e1bee7}
+#rulesList{margin-top:25px;background:#fffaf0;padding:10px;border-left:4px solid #a67b5b}
+</style>
 </head>
 <body>
-  <h1>Write Like Mark Twain</h1>
+<h1>Write Like Mark Twain</h1>
 
-  <div id="editorContainer">
-    <div id="lineNumbers"></div>
-    <div id="editor" contenteditable="true" spellcheck="false"></div>
-    <span class="cursor" id="cursor"></span>
-  </div>
+<div id="editorContainer">
+  <div id="lineNumbers"></div>
+  <div id="editor" contenteditable="true" spellcheck="false"></div>
+  <span class="cursor" id="cursor"></span>
+</div>
 
-  <div id="annotations"></div>
+<div id="annotations"></div>
 
-  <div id="rulesList">
-    <h3>Mark Twain’s Rules of Writing:</h3>
-    <ul>
-      <li>Never use a five-dollar word when a fifty-cent word will do.</li>
-      <li>Use plain, simple language, short words, and brief sentences.</li>
-      <li>Be cautious with adjectives — one is plenty.</li>
-      <li>Substitute “damn” for “very.”</li>
-      <li>The difference between the almost right word and the right word is like the difference between the lightning bug and lightning.</li>
-      <li>Avoid alliteration always.</li>
-      <li>Prepositions are not words to end sentences with.</li>
-      <li>Avoid clichés like the plague.</li>
-      <li>Comparisons are as bad as clichés.</li>
-      <li>Be specific — never generalize.</li>
-      <li>Don’t be redundant; it’s superfluous and obfuscates meaning.</li>
-      <li>Who needs rhetorical questions?</li>
-      <li>Exaggeration is a billion times worse than understatement.</li>
-      <li>Simplicity is the soul of writing.</li>
-    </ul>
-  </div>
+<div id="rulesList">
+  <h3>Twain’s Rules of Writing:</h3>
+  <ul>
+    <li>Never use a five-dollar word when a fifty-cent word will do.</li>
+    <li>Use plain, simple language, short words, and brief sentences.</li>
+    <li>Be cautious with adjectives — one is plenty.</li>
+    <li>Substitute “damn” for “very.”</li>
+    <li>The right word beats the almost right one like lightning beats a lightning-bug.</li>
+    <li>Avoid alliteration always.</li>
+    <li>Don’t end sentences with prepositions.</li>
+    <li>Avoid clichés like the plague.</li>
+    <li>Comparisons are as bad as clichés.</li>
+    <li>Be specific — never generalize.</li>
+    <li>Don’t be redundant; it muddies meaning.</li>
+    <li>Who needs rhetorical questions?</li>
+    <li>Exaggeration is a billion times worse than understatement.</li>
+    <li>Simplicity is the soul of writing.</li>
+  </ul>
+</div>
 
-  <script>
-    const editor = document.getElementById("editor");
-    const annotationsDiv = document.getElementById("annotations");
-    const lineNumbers = document.getElementById("lineNumbers");
-    const cursor = document.getElementById("cursor");
+<script>
+const editor=document.getElementById("editor"),
+      annotations=document.getElementById("annotations"),
+      lineNumbers=document.getElementById("lineNumbers"),
+      cursor=document.getElementById("cursor");
 
-    // Restore saved text
-    editor.textContent = localStorage.getItem("twainText") || "Write like Mark Twain...";
+editor.textContent=localStorage.getItem("twainText")||"Write like Mark Twain...";
 
-    editor.addEventListener("input", () => {
-      localStorage.setItem("twainText", editor.textContent);
-      analyzeText();
-    });
+editor.addEventListener("input",()=>{
+  localStorage.setItem("twainText",editor.textContent);
+  analyze();
+});
+editor.addEventListener("scroll",()=>lineNumbers.scrollTop=editor.scrollTop);
 
-    editor.addEventListener("scroll", () => {
-      lineNumbers.scrollTop = editor.scrollTop;
-    });
+function updateLines(){
+  const lines=editor.textContent.split(/\n/).length;
+  lineNumbers.innerHTML=Array.from({length:lines},(_,i)=>i+1).join("<br>");
+}
 
-    function updateLineNumbers() {
-      const lines = editor.textContent.split(/\n/).length;
-      lineNumbers.innerHTML = Array.from({ length: lines }, (_, i) => i + 1).join("<br>");
+function analyze(){
+  const text=editor.textContent;
+  updateLines();
+  annotations.innerHTML="";
+  const rules=[
+    {re:/\bvery\b/gi,c:"pink",note:'“Replace ‘very’ with something stronger — or damn it altogether.”'},
+    {re:/\b(incredibly|extremely|so much|awfully|tremendously|exaggerate\w*)\b/gi,c:"orange",note:'“Don’t stretch the truth till it snaps.”'},
+    {re:/\butilize\b|\bcommence\b|\bendeavor\b|\bassist\b/gi,c:"yellow",note:'“Use plain speech, son. Start where you stand.”'},
+    {re:/\blike the plague\b|\bold hat\b|\bneedless to say\b/gi,c:"purple",note:'“Avoid clichés —they creak worse than an old door.”'},
+    {re:/\b(adjective\w*)\b/gi,c:"green",note:'“Too many adjectives spoil the broth.”'},
+    {re:/\?\s*$/gm,c:"blue",note:'“Rhetorical questions? You already know the answer.”'},
+    {re:/\b(in|on|at|by|for|with|about|from|of)\.$/gmi,c:"orange",note:'“Don’t end your sentence with a preposition!”'},
+    {re:/\bfluff\w*|\bredundan\w*|\bwordy\b/gi,c:"purple",note:'“Trim the fluff — tight writing wins.”'},
+    {re:/\bperhaps\b|\bmaybe\b|\bsomehow\b|\bsomewhere\b/gi,c:"blue",note:'“Be certain or be quiet.”'},
+    {re:/\bsimple\b|\bsimplicity\b/gi,c:"yellow",note:'“Simplicity is the soul of writing.”'}
+  ];
+  let html=text;
+  rules.forEach(r=>{
+    if(r.re.test(text)){
+      html=html.replace(r.re,m=>`<span class="highlight-${r.c}">${m}</span>`);
+      const a=document.createElement("div");
+      a.className=`annotation ${r.c}`;
+      a.textContent="Twain says: "+r.note;
+      annotations.appendChild(a);
     }
+  });
+  editor.innerHTML=html;
+  placeCursor();
+}
 
-    function analyzeText() {
-      const text = editor.textContent;
-      updateLineNumbers();
-      annotationsDiv.innerHTML = "";
+function placeCursor(){
+  const range=document.createRange(),sel=window.getSelection();
+  range.selectNodeContents(editor);
+  range.collapse(false);
+  sel.removeAllRanges();
+  sel.addRange(range);
+}
 
-      const patterns = [
-        { regex: /\bvery\b/gi, color: "pink", note: '"Twain growls: “Replace ‘very’ with something stronger—or damn it altogether.”"' },
-        { regex: /\bexaggeration\b|\boverly\b|\bincredibly\b|\bextremely\b|\bso much\b/gi, color: "orange", note: '"Twain scoffs: “Don’t stretch the truth till it snaps.”"' },
-        { regex: /\bperhaps\b|\bmaybe\b|\bsomehow\b|\bsomewhere\b/gi, color: "blue", note: '"Twain quips: “Don’t hedge your bets. Be certain or be quiet.”"' },
-        { regex: /\butilize\b|\bcommence\b|\bendeavor\b/gi, color: "yellow", note: '"Twain chuckles: “Use plain speech, son. Start where you stand.”"' },
-        { regex: /\b(?:like the plague|old hat)\b/gi, color: "purple", note: '"Twain says: “Avoid clichés—they creak worse than an old door.”"' },
-        { regex: /\b(adjective\w*)\b/gi, color: "green", note: '"Twain warns: “Too many adjectives spoil the broth.”"' },
-        { regex: /\?\s*$/gm, color: "blue", note: '"Twain snorts: “Rhetorical questions? You already know the answer.”"' },
-        { regex: /\b(in|on|at|by|for|with|about|from|of)\.$/gmi, color: "orange", note: '"Twain wags his finger: “Avoid ending sentences with prepositions!”"' }
-      ];
+(function blink(){
+  cursor.style.visibility=(cursor.style.visibility==="hidden")?"visible":"hidden";
+  setTimeout(blink,600);
+})();
 
-      let html = text;
-      patterns.forEach(rule => {
-        html = html.replace(rule.regex, match => `<span class="highlight-${rule.color}">${match}</span>`);
-        if (rule.regex.test(text)) {
-          const bubble = document.createElement("div");
-          bubble.className = `annotation ${rule.color}`;
-          bubble.innerHTML = rule.note;
-          annotationsDiv.appendChild(bubble);
-        }
-      });
-
-      editor.innerHTML = html;
-      placeCursorAtEnd();
-    }
-
-    function placeCursorAtEnd() {
-      const range = document.createRange();
-      const sel = window.getSelection();
-      range.selectNodeContents(editor);
-      range.collapse(false);
-      sel.removeAllRanges();
-      sel.addRange(range);
-    }
-
-    function blinkCursor() {
-      cursor.style.visibility = (cursor.style.visibility === "hidden") ? "visible" : "hidden";
-      setTimeout(blinkCursor, 600);
-    }
-    blinkCursor();
-
-    analyzeText();
-  </script>
+analyze();
+</script>
 </body>
 </html>
