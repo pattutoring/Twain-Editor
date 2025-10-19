@@ -7,9 +7,11 @@
 <style>
 body { font-family: "Courier New", monospace; background: #fdf6e3; margin: 20px; }
 h1 { text-align: center; font-size: 2.5em; margin-bottom: 20px; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
-.editor-container { max-width: 900px; margin:auto; background:#fdf6e3; padding:15px; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.1); }
-#editor { width: 100%; min-height:500px; font-family:"Courier New", monospace; font-size:16px; padding:15px; border-radius:8px; border:1px solid #ccc; line-height:1.5; white-space:pre-wrap; outline:none; caret-color:black; }
-#feedback { margin-top:20px; font-style:italic; padding:15px; border-radius:8px; }
+.editor-container { max-width: 900px; margin:auto; background:#fdf6e3; padding:0; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.1); display:flex; }
+.line-numbers { background:#eee; padding:10px 5px; text-align:right; user-select:none; color:#666; font-size:16px; line-height:1.5; }
+#editor { flex:1; min-height:500px; font-family:"Courier New", monospace; font-size:16px; padding:15px; border:none; line-height:1.5; white-space:pre-wrap; outline:none; caret-color:black; position:relative; }
+#editor:focus { outline:none; }
+#feedback { margin-top:20px; font-style:italic; padding:15px; border-radius:8px; max-width:900px; margin-left:auto; margin-right:auto; }
 button { margin-top:10px; padding:10px 20px; font-size:16px; cursor:pointer; background:#0074D9; color:white; border:none; border-radius:8px; transition:0.2s; }
 button:hover { background:#005fa3; }
 
@@ -21,16 +23,22 @@ button:hover { background:#005fa3; }
 .rule-5 { background-color: rgba(0,0,255,0.3); }
 .rule-6 { background-color: rgba(128,0,128,0.3); }
 .rule-7 { background-color: rgba(255,192,203,0.3); }
-.rule-8 { text-decoration: underline red; }
+.rule-8 { text-decoration: underline red; } 
 .rule-9 { background-color: rgba(128,128,0,0.3); }
-.rule-10 { background-color: rgba(0,128,128,0.3); }
+.rule-10 { background-color: rgba(0,128,128,0.3); } 
 .tooltip { position:relative; cursor:help; }
 .tooltip:hover::after { content: attr(data-tooltip); position:absolute; background:#333; color:#fff; padding:3px 8px; border-radius:4px; top:-25px; left:0; white-space:nowrap; font-size:12px; z-index:10; }
+
+/* Typewriter caret */
+@keyframes blink { 0%,50%,100% {opacity:1;} 25%,75% {opacity:0;} }
+#editor::after { content:""; display:inline-block; width:1px; background:black; animation:blink 1s step-end infinite; position:absolute; pointer-events:none; }
+
 </style>
 </head>
 <body>
 <h1>Twain Editor</h1>
 <div class="editor-container">
+  <div class="line-numbers" id="lineNumbers">1</div>
   <div id="editor" contenteditable="true" spellcheck="false"></div>
 </div>
 <div style="display:flex; justify-content:space-between; max-width:900px; margin:auto; margin-top:10px;">
@@ -40,50 +48,93 @@ button:hover { background:#005fa3; }
 <div id="feedback"></div>
 
 <script>
-// Dictionary
-const dictionary = new Set(["the","and","of","to","a","in","is","it","you","that","he","was","for","on","are","as","with","his","they","i","at","be","this","have","from","or","one","had","by","word","but","not","what","all","were","we","when","your","can","said","there","use","an","each","which","she","do","how","their","if","will","up","other","about","out","many","then","them","these","so","some","her","would","make","like","him","into","time","has","look","two","more","write","go","see","number","no","way","could","people","my","than","first","water","been","call","who","oil","its","now","find","long","down","day","did","get","come","made","may","part","plain","simple","language","short","words","brief","sentences","almost","right","very","damn","redundant","unnecessary","superfluous","obfuscates","exaggeration","alliteration","comparison","cliche","spelling","error"]);
+// Expanded dictionary
+const dictionary = new Set([
+  "the","and","of","to","a","in","is","it","you","that","he","was","for","on","are","as","with","his",
+  "they","i","at","be","this","have","from","or","one","had","by","word","but","not","what","all","were",
+  "we","when","your","can","said","there","use","an","each","which","she","do","how","their","if","will",
+  "up","other","about","out","many","then","them","these","so","some","her","would","make","like","him",
+  "into","time","has","look","two","more","write","go","see","number","no","way","could","people","my",
+  "than","first","water","been","call","who","oil","its","now","find","long","down","day","did","get","come",
+  "made","may","part","plain","simple","language","short","words","brief","sentences","almost","right",
+  "very","damn","redundant","unnecessary","superfluous","obfuscates","exaggeration","alliteration","comparison",
+  "cliche","spelling","error","yellow","green","blue","red","orange","purple"
+]);
 
-// Rules
 const rules = [
-  { regex: /\b(utilize|commence|ascertain|ameliorate|endeavor|employ|emolument)\b/gi, message:"Ah! Use simpler words, dear friend.", color:0 },
-  { regex: /\b\w+ly\b/gi, message:"Too many adjectives! Twain would frown.", color:1 },
-  { regex: /\bvery\b/gi, message:"Replace 'very' with 'damn', as Twain might advise.", color:2 },
-  { regex: /\balmost right\b/gi, message:"Choose the precise word — like a lightning bug vs lightning.", color:3 },
-  { regex: /\b(\w)\w*\s+\1\w*\b/gi, message:"Alliteration spotted! Twain abhors repetition.", color:4 },
-  { regex: /\b(once in a lifetime|at the end of the day|in the nick of time|old hat|like a plague)\b/gi, message:"Avoid clichés — originality is king.", color:5 },
-  { regex: /\b(redundant|unnecessary|superfluous|obfuscates|more words than necessary)\b/gi, message:"Cut the fluff! Brevity wins.", color:6 },
-  { regex: /\?\s*$/g, message:"Rhetorical questions are seldom needed, Twain would say.", color:7 },
-  { regex: /\b(nearly|extremely|tremendously|huge|gigantic)\b/gi, message:"Exaggeration detected — understatement is safer.", color:8 },
-  { regex: /\b(five-dollar word|fifty-cent word)\b/gi, message:"Don't use a five-dollar word when a fifty-cent one will do.", color:9 },
-  { regex: /\b(plain, simple language|short words|brief sentences)\b/gi, message:"Plain, simple language is always wise.", color:10 },
-  { regex: /\b(prepositions at sentence end)\b/gi, message:"Avoid ending sentences with prepositions — classic trap!", color:11 }
+  { regex: /\b(utilize|commence|ascertain|ameliorate|endeavor|employ|emolument)\b/gi, message:"Never use a five-dollar word when a fifty-cent one suffices, dear friend.", color:0 },
+  { regex: /\b\w+ly\b/gi, message:"Twain frowns upon adjectives and adverbs: keep it simple!", color:1 },
+  { regex: /\bvery\b/gi, message:"Swap 'very' for 'damn', as a Twain-approved shortcut.", color:2 },
+  { regex: /\balmost right\b/gi, message:"Choose the precise word — the lightning bug is not lightning.", color:3 },
+  { regex: /\b(\w)\w*\s+\1\w*\b/gi, message:"Alliteration! Twain abhors doubling letters for effect.", color:4 },
+  { regex: /\b(once in a lifetime|at the end of the day|in the nick of time|old hat|like a plague)\b/gi, message:"Clichés are the death of originality!", color:5 },
+  { regex: /\b(redundant|unnecessary|superfluous|obfuscates|more words than necessary)\b/gi, message:"Trim the fluff, my friend. Brevity wins.", color:6 },
+  { regex: /\?\s*$/g, message:"Rhetorical questions? Rarely needed, Twain says.", color:7 },
+  { regex: /\b(nearly|extremely|tremendously|huge|gigantic)\b/gi, message:"Exaggeration detected; less is more.", color:8 },
+  { regex: /\b(five-dollar word|fifty-cent word)\b/gi, message:"Use words that carry meaning without pomp.", color:9 },
+  { regex: /\b(plain, simple language|short words|brief sentences)\b/gi, message:"Simplicity is the soul of writing.", color:10 },
+  { regex: /\b(prepositions at sentence end)\b/gi, message:"Avoid ending sentences with prepositions!", color:11 }
 ];
 
-const editor = document.getElementById('editor');
-const feedbackDiv = document.getElementById('feedback');
-const wordCountP = document.getElementById('wordCount');
+const editor=document.getElementById('editor');
+const feedbackDiv=document.getElementById('feedback');
+const wordCountP=document.getElementById('wordCount');
+const lineNumbers=document.getElementById('lineNumbers');
 
-// Utility
+// Escape HTML
 function escapeHtml(text){ return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function spellCheckWords(text){ 
-  const words = text.split(/\s+/); 
-  let misspell = []; 
-  words.forEach(w=>{ const clean = w.replace(/[^a-zA-Z]/g,'').toLowerCase(); if(clean && !dictionary.has(clean)) misspell.push(w); }); 
-  return misspell; 
+
+// Spell check
+function spellCheckWords(text){
+  const words=text.split(/\s+/);
+  let misspell=[];
+  words.forEach(w=>{ const clean=w.replace(/[^a-zA-Z]/g,'').toLowerCase(); if(clean && !dictionary.has(clean)) misspell.push(w); });
+  return misspell;
 }
 
-// Caret
-function saveCaret(containerEl){ const sel = window.getSelection(); if(sel.rangeCount===0) return null; const range = sel.getRangeAt(0); const pre = range.cloneRange(); pre.selectNodeContents(containerEl); pre.setEnd(range.startContainer, range.startOffset); return pre.toString().length; }
-function restoreCaret(containerEl,pos){ let nodes=[containerEl],node,found=false,charIndex=0,range=document.createRange(); range.setStart(containerEl,0); range.collapse(true); while(nodes.length>0){node=nodes.pop(); if(node.nodeType==3){const next=charIndex+node.length;if(!found && pos>=charIndex && pos<=next){range.setStart(node,pos-charIndex);range.collapse(true);found=true;break;}charIndex=next;}else{for(let i=node.childNodes.length-1;i>=0;i--) nodes.push(node.childNodes[i]);}} const sel=window.getSelection(); sel.removeAllRanges(); sel.addRange(range); }
+// Caret position
+function saveCaret(containerEl){
+  const sel=window.getSelection();
+  if(sel.rangeCount===0) return null;
+  const range=sel.getRangeAt(0);
+  const pre=range.cloneRange();
+  pre.selectNodeContents(containerEl);
+  pre.setEnd(range.startContainer,range.startOffset);
+  return pre.toString().length;
+}
 
-// Main highlight
+function restoreCaret(containerEl,pos){
+  let nodes=[containerEl],node,found=false,charIndex=0,range=document.createRange();
+  range.setStart(containerEl,0);range.collapse(true);
+  while(nodes.length>0){
+    node=nodes.pop();
+    if(node.nodeType===3){
+      const next=charIndex+node.length;
+      if(!found && pos>=charIndex && pos<=next){range.setStart(node,pos-charIndex);range.collapse(true);found=true;break;}
+      charIndex=next;
+    } else {for(let i=node.childNodes.length-1;i>=0;i--) nodes.push(node.childNodes[i]);}
+  }
+  const sel=window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+}
+
+// Update line numbers
+function updateLineNumbers(text){
+  const lines=text.split(/\n/).length;
+  let nums="";
+  for(let i=1;i<=lines;i++) nums+=i+"\n";
+  lineNumbers.innerText=nums;
+}
+
+// Highlight & annotate
 function highlightText(){
   const caretPos=saveCaret(editor);
   const text=editor.innerText;
-  let annotations=[];
   let html=escapeHtml(text);
+  let annotations=[];
 
-  // Highlight rules
+  // Apply rules
   rules.forEach(r=>{
     html=html.replace(r.regex,match=>{
       annotations.push({text:match,message:r.message,color:r.color});
@@ -99,6 +150,7 @@ function highlightText(){
   });
 
   editor.innerHTML=html.replace(/\n/g,'<br>');
+  updateLineNumbers(text);
 
   feedbackDiv.innerHTML=annotations.map(a=>`<div style="background-color: rgba(${a.color*20},${255-a.color*20},${a.color*10},0.3); padding:3px 5px; margin-bottom:2px;">${a.message}: ${a.text}</div>`).join('');
   wordCountP.textContent="Word count: "+(text.trim()?text.trim().split(/\s+/).length:0);
@@ -109,6 +161,7 @@ function highlightText(){
 editor.addEventListener('input',highlightText);
 document.getElementById('analyzeBtn').addEventListener('click',highlightText);
 highlightText();
+
 </script>
 </body>
 </html>
