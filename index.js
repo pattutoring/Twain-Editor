@@ -6,5 +6,5 @@ const container = document.getElementById("editor-container");
 const root = ReactDOM.createRoot(container);
 
 root.render(
-  React.createElement(TwainStudentEditor, { title: "Your Twain Editor" })
+  React.createElement(TwainStudentEditor)
 );
