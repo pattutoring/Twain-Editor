@@ -2,26 +2,31 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Twain Writing Editor</title>
+  <title>Twain Editor</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: "Courier New", Courier, monospace; /* typewriter font */
       margin: 40px;
       background-color: #fdf6e3;
       color: #333;
     }
     h1 {
       text-align: center;
+      font-family: "Courier New", Courier, monospace; /* heading uses typewriter too */
+      font-size: 2.5em;
+      margin-bottom: 30px;
     }
     #editor-container {
       margin: 20px auto;
-      max-width: 800px;
+      max-width: 900px;
     }
     textarea {
       width: 100%;
-      font-family: monospace;
-      font-size: 16px;
-      padding: 10px;
+      height: 500px; /* larger text box */
+      font-family: "Courier New", Courier, monospace;
+      font-size: 18px;
+      padding: 15px;
+      line-height: 1.5;
     }
     button {
       margin-top: 10px;
@@ -29,15 +34,10 @@
       font-size: 16px;
       cursor: pointer;
     }
-    #feedback {
-      margin-top: 20px;
-      font-style: italic;
-      color: #555;
-    }
   </style>
 </head>
 <body>
-  <h1>Twain Writing Editor</h1>
+  <h1>Twain Editor</h1>
   <div id="editor-container"></div>
 
   <script type="module" src="index.js"></script>
