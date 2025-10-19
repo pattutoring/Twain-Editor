@@ -1,12 +1,12 @@
-import React, { useState, useRef, useEffect } from "https://esm.sh/react";
+import React, { useState, useEffect, useRef } from "https://esm.sh/react";
 
 export default function TwainStudentEditor() {
   const [text, setText] = useState("");
   const [feedback, setFeedback] = useState([]);
-  const textareaRef = useRef();
-  const overlayRef = useRef();
+  const editorRef = useRef();
+  const lineRef = useRef();
 
-  const dictionary = ["the","and","to","of","a","in","is","it","you","that","he","was","be","have","this","for","on","with"];
+  const dictionary = ["the","and","to","of","a","in","is","it","you","that","he","was"];
 
   const rules = [
     { class:"fancy-word", message:'Avoid fancy words.', regex:/\b(utilize|commence|ascertain|ameliorate|endeavor|employ)\b/gi },
@@ -22,57 +22,72 @@ export default function TwainStudentEditor() {
     { class:"exaggeration", message:"Exaggeration is worse than understatement.", regex:/\b(nearly|extremely|tremendously|huge|gigantic)\b/gi }
   ];
 
-  const handleInput = (e) => setText(e.target.value);
+  const handleInput = (e) => {
+    setText(e.target.innerText);
+  };
 
-  const getHighlighted = (input) => {
-    let escaped = input.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-    const tokens = escaped.split(/(\s+)/);
-    return tokens.map(token => {
-      let t = token;
-      rules.forEach(r => { if(r.regex.test(token)) t=`<span class="highlight ${r.class}" title="${r.message}">${token}</span>`; });
-      if(/^\w+$/.test(token) && !dictionary.includes(token.toLowerCase())) t=`<span class="highlight spell-error" title="Possible spelling error">${token}</span>`;
-      return t;
-    }).join("");
+  const highlightText = (input) => {
+    const escaped = input
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/\n/g,"<br>");
+    const words = escaped.split(/(\s+)/).map(word => {
+      let w = word;
+      rules.forEach(r => { if(r.regex.test(word)) w=`<span class="highlight ${r.class}" title="${r.message}">${word}</span>`; });
+      if(/^\w+$/.test(word) && !dictionary.includes(word.toLowerCase())) w=`<span class="highlight spell-error" title="Possible spelling error">${word}</span>`;
+      return w;
+    });
+    return words.join("");
   };
 
   useEffect(() => {
-    if(overlayRef.current){
-      overlayRef.current.innerHTML = getHighlighted(text);
+    if(editorRef.current){
+      editorRef.current.innerHTML = highlightText(text);
+      placeCaretAtEnd(editorRef.current);
     }
   }, [text]);
+
+  const placeCaretAtEnd = (el) => {
+    el.focus();
+    const range = document.createRange();
+    const sel = window.getSelection();
+    range.selectNodeContents(el);
+    range.collapse(false);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  };
 
   const analyze = () => {
     const found = rules.filter(r => r.regex.test(text));
     setFeedback(found);
   };
 
-  const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
-  const lineCount = Math.max(text.split("\n").length,1);
-
   return (
     <div>
       <div className="editor-container">
         <div className="line-numbers">
-          {Array.from({length: lineCount}, (_,i)=>i+1).join("\n")}
+          {text.split("\n").map((_,i)=>i+1).join("\n")}
         </div>
         <div className="editor-wrapper">
-          <textarea
-            ref={textareaRef}
-            value={text}
-            onChange={handleInput}
-            placeholder="Write like Twain..."
-          />
-          <div ref={overlayRef} className="highlight-overlay"></div>
+          <div
+            ref={editorRef}
+            contentEditable
+            onInput={handleInput}
+            className="content-editor"
+          ></div>
         </div>
       </div>
 
       <div style={{display:"flex", justifyContent:"space-between", marginTop:"10px"}}>
-        <p>Word count: {wordCount}</p>
+        <p>Word count: {text.trim().split(/\s+/).filter(w=>w).length}</p>
         <button onClick={analyze}>Analyze</button>
       </div>
 
       {feedback.length>0 && (
-        <div className="feedback" dangerouslySetInnerHTML={{__html: feedback.map(f=>f.message).join("<br>")}} />
+        <div className="feedback">
+          {feedback.map((f,i)=><div key={i}>{f.message}</div>)}
+        </div>
       )}
     </div>
   );
