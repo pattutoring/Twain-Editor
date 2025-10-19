@@ -1,18 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PAT Tutoring — Mark Twain Writing Editor</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
-      rel="stylesheet"
-    />
-  </head>
-  <body class="bg-gray-100 flex items-center justify-center min-h-screen">
-    <div id="root" class="w-full max-w-4xl mx-auto p-4"></div>
+<head>
+  <meta charset="UTF-8">
+  <title>Twain Writing Editor</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      background-color: #fdf6e3;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+    }
+    #editor-container {
+      margin: 20px auto;
+      max-width: 800px;
+    }
+    textarea {
+      width: 100%;
+      font-family: monospace;
+      font-size: 16px;
+      padding: 10px;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #feedback {
+      margin-top: 20px;
+      font-style: italic;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <h1>Twain Writing Editor</h1>
+  <div id="editor-container"></div>
 
-   <script type="module" src="index.js"></script>
-
-  </body>
+  <!-- React + ReactDOM from CDN -->
+  <script type="module" src="index.js"></script>
+</body>
 </html>
