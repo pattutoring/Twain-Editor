@@ -25,6 +25,22 @@
     padding: 15px;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    position: relative;
+  }
+
+  .highlighted-text {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    font-family: "Courier New", monospace;
+    font-size: 16px;
+    padding: 15px;
+    border-radius: 8px;
+    pointer-events: none;
+    white-space: pre-wrap;
+    word-wrap: break-word;
   }
 
   textarea {
@@ -35,12 +51,27 @@
     padding: 15px;
     border-radius: 8px;
     border: none;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
     resize: none;
     outline: none;
-    background-color: white;
+    background-color: transparent;
+    color: black;
     line-height: 1.5;
     white-space: pre-wrap;
+    caret-color: black;
+    position: relative;
+  }
+
+  textarea::placeholder {
+    color: #999;
+  }
+
+  textarea {
+    animation: blink-cursor 1s steps(2, start) infinite;
+  }
+
+  @keyframes blink-cursor {
+    0%, 50% { caret-color: black; }
+    51%, 100% { caret-color: transparent; }
   }
 
   button {
@@ -66,60 +97,95 @@
     border-left: 4px solid #ffcc00;
     border-radius: 8px;
   }
+
+  .rule-0 { background-color: rgba(255,0,0,0.3); }
+  .rule-1 { background-color: rgba(255,165,0,0.3); }
+  .rule-2 { background-color: rgba(255,255,0,0.3); }
+  .rule-3 { background-color: rgba(0,128,0,0.3); }
+  .rule-4 { background-color: rgba(0,255,255,0.3); }
+  .rule-5 { background-color: rgba(0,0,255,0.3); }
+  .rule-6 { background-color: rgba(128,0,128,0.3); }
+  .rule-7 { background-color: rgba(255,192,203,0.3); }
+  .rule-8 { background-color: rgba(128,128,128,0.3); }
+
+  .tooltip {
+    position: relative;
+    cursor: help;
+  }
+
+  .tooltip:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    background: #333;
+    color: #fff;
+    padding: 3px 8px;
+    border-radius: 4px;
+    top: -25px;
+    left: 0;
+    white-space: nowrap;
+    font-size: 12px;
+    z-index: 10;
+  }
 </style>
 </head>
 <body>
 <h1>Twain Editor</h1>
-<div id="editor-container"></div>
-
-<!-- Load React and ReactDOM UMD builds -->
-<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<div class="editor-container">
+  <div id="highlight" class="highlighted-text"></div>
+  <textarea id="editor" placeholder="Write like Twain would..."></textarea>
+</div>
+<div style="display:flex; justify-content:space-between; max-width:900px; margin:auto; margin-top:10px;">
+  <p id="wordCount">Word count: 0</p>
+  <button id="analyzeBtn">Analyze</button>
+</div>
+<div id="feedback" class="feedback"></div>
 
 <script>
-const e = React.createElement;
+const textarea = document.getElementById('editor');
+const highlightDiv = document.getElementById('highlight');
+const feedbackDiv = document.getElementById('feedback');
+const wordCountP = document.getElementById('wordCount');
 
-function TwainStudentEditor() {
-  const [text, setText] = React.useState("");
-  const [feedback, setFeedback] = React.useState([]);
+const rules = [
+  { regex: /\b(utilize|commence|ascertain|ameliorate|endeavor|employ)\b/gi, message: "Use simpler words." },
+  { regex: /\b\w+ly\b/gi, message: "Too many adjectives/adverbs." },
+  { regex: /\bvery\b/gi, message: "Consider 'damn' instead of 'very'." },
+  { regex: /\balmost right\b/gi, message: "Choose the precise word." },
+  { regex: /\b(\w)\w*\s+\1\w*\b/gi, message: "Alliteration detected." },
+  { regex: /\b(once in a lifetime|at the end of the day|in the nick of time|old hat)\b/gi, message: "Replace clichés with original phrasing." },
+  { regex: /\b(redundant|unnecessary|superfluous|obfuscates)\b/gi, message: "Remove redundant words." },
+  { regex: /\?\s*$/g, message: "Rhetorical question detected." },
+  { regex: /\b(nearly|extremely|tremendously|huge|gigantic)\b/gi, message: "Exaggeration detected." }
+];
 
-  const rules = [
-    { rule: "Avoid fancy words", test: t => /\b(utilize|commence|ascertain|ameliorate|endeavor|employ)\b/i.test(t), message: "Use simpler words." },
-    { rule: "Be cautious with adjectives", test: t => /\b\w+ly\b/i.test(t), message: "Too many adjectives/adverbs." },
-    { rule: "Substitute 'damn' for 'very'", test: t => /\bvery\b/i.test(t), message: "Consider 'damn' instead of 'very'." },
-    { rule: "Avoid almost right", test: t => /\balmost right\b/i.test(t), message: "Choose the precise word." },
-    { rule: "Avoid alliteration", test: t => /\b(\w)\w*\s+\1\w*\b/i.test(t), message: "Alliteration detected." },
-    { rule: "Avoid clichés", test: t => /\b(once in a lifetime|at the end of the day|in the nick of time|old hat)\b/i.test(t), message: "Replace clichés with original phrasing." },
-    { rule: "Avoid redundancy", test: t => /\b(redundant|unnecessary|superfluous|obfuscates)\b/i.test(t), message: "Remove redundant words." },
-    { rule: "Avoid rhetorical questions", test: t => /\?\s*$/.test(t), message: "Rhetorical question detected." },
-    { rule: "Avoid exaggeration", test: t => /\b(nearly|extremely|tremendously|huge|gigantic)\b/i.test(t), message: "Exaggeration detected." }
-  ];
-
-  const analyze = () => {
-    const found = rules.filter(r => r.test(text));
-    setFeedback(found);
-  };
-
-  const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
-
-  return e('div', { className: 'editor-container' }, 
-    e('textarea', {
-      placeholder: "Write like Twain would...",
-      value: text,
-      onChange: e => setText(e.target.value)
-    }),
-    e('div', { style: { display: "flex", justifyContent: "space-between", marginTop: "10px" } },
-      e('p', null, `Word count: ${wordCount}`),
-      e('button', { onClick: analyze }, 'Analyze')
-    ),
-    feedback.length > 0 && e('div', { className: 'feedback' }, feedback.map((f,i) => e('div', { key:i }, f.message)))
-  );
+function escapeHtml(text) {
+  return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-const container = document.getElementById('editor-container');
-const root = ReactDOM.createRoot(container);
-root.render(e(TwainStudentEditor));
-</script>
+function updateHighlight() {
+  let text = escapeHtml(textarea.value);
+  rules.forEach((rule, idx) => {
+    text = text.replace(rule.regex, match => `<span class="tooltip rule-${idx}" data-tooltip="${rule.message}">${match}</span>`);
+  });
+  highlightDiv.innerHTML = text.replace(/\n/g,'<br>');
+}
 
+textarea.addEventListener('input', () => {
+  updateHighlight();
+  wordCountP.textContent = "Word count: " + (textarea.value.trim() ? textarea.value.trim().split(/\s+/).length : 0);
+});
+
+document.getElementById('analyzeBtn').addEventListener('click', () => {
+  let found = [];
+  rules.forEach(rule => {
+    if(rule.regex.test(textarea.value)) found.push(rule.message);
+    rule.regex.lastIndex = 0; // reset regex state
+  });
+  feedbackDiv.innerHTML = found.length ? found.map(m => `<div>${m}</div>`).join('') : "No issues found — Twain would nod!";
+});
+
+// Initial highlight
+updateHighlight();
+</script>
 </body>
 </html>
