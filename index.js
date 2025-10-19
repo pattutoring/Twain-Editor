@@ -4,9 +4,7 @@ import TwainStudentEditor from "./TwainStudentEditor.js";
 
 const container = document.getElementById("editor-container");
 const root = ReactDOM.createRoot(container);
+root.render(React.createElement(TwainStudentEditor));
 
-root.render(
-  React.createElement(TwainStudentEditor)
-);
 
 
