@@ -5,100 +5,20 @@
 <title>Twain Editor</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-  body {
-    font-family: "Courier New", monospace;
-    background-color: #fdf6e3;
-    margin: 20px;
-  }
-
-  h1 {
-    text-align: center;
-    font-size: 2.5em;
-    margin-bottom: 20px;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-  }
-
+  body { font-family: "Courier New", monospace; background: #fdf6e3; margin: 20px; }
+  h1 { text-align: center; font-size: 2.5em; margin-bottom: 20px; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
   .editor-container {
-    max-width: 900px;
-    margin: auto;
-    background-color: #fdf6e3;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    position: relative;
+    max-width: 900px; margin:auto; background:#fdf6e3; padding:15px; border-radius:8px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.1);
   }
-
-  .highlighted-text {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    font-family: "Courier New", monospace;
-    font-size: 16px;
-    padding: 15px;
-    border-radius: 8px;
-    pointer-events: none;
-    white-space: pre-wrap;
-    word-wrap: break-word;
+  #editor {
+    width: 100%; min-height:500px; font-family:"Courier New", monospace; font-size:16px;
+    padding:15px; border-radius:8px; border:1px solid #ccc; line-height:1.5;
+    white-space:pre-wrap; outline:none;
   }
-
-  textarea {
-    width: 100%;
-    height: 500px;
-    font-family: "Courier New", monospace;
-    font-size: 16px;
-    padding: 15px;
-    border-radius: 8px;
-    border: none;
-    resize: none;
-    outline: none;
-    background-color: transparent;
-    color: black;
-    line-height: 1.5;
-    white-space: pre-wrap;
-    caret-color: black;
-    position: relative;
-  }
-
-  textarea::placeholder {
-    color: #999;
-  }
-
-  textarea {
-    animation: blink-cursor 1s steps(2, start) infinite;
-  }
-
-  @keyframes blink-cursor {
-    0%, 50% { caret-color: black; }
-    51%, 100% { caret-color: transparent; }
-  }
-
-  button {
-    margin-top: 10px;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    background-color: #0074D9;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    transition: background 0.2s ease;
-  }
-
-  button:hover { background-color: #005fa3; }
-
-  .feedback {
-    margin-top: 20px;
-    font-style: italic;
-    color: #555;
-    background-color: #fff8d6;
-    padding: 15px;
-    border-left: 4px solid #ffcc00;
-    border-radius: 8px;
-  }
-
-  /* Rule highlight colors */
+  #feedback { margin-top:20px; font-style:italic; color:#555; background:#fff8d6; padding:15px; border-left:4px solid #ffcc00; border-radius:8px; }
+  button { margin-top:10px; padding:10px 20px; font-size:16px; cursor:pointer; background:#0074D9; color:white; border:none; border-radius:8px; transition:0.2s; }
+  button:hover { background:#005fa3; }
   .rule-0 { background-color: rgba(255,0,0,0.3); }
   .rule-1 { background-color: rgba(255,165,0,0.3); }
   .rule-2 { background-color: rgba(255,255,0,0.3); }
@@ -107,72 +27,52 @@
   .rule-5 { background-color: rgba(0,0,255,0.3); }
   .rule-6 { background-color: rgba(128,0,128,0.3); }
   .rule-7 { background-color: rgba(255,192,203,0.3); }
-  .rule-8 { background-color: rgba(128,128,128,0.3); }
-  .rule-9 { background-color: rgba(0,128,128,0.3); } 
-  .rule-10 { background-color: rgba(128,128,0,0.3); } 
-  .rule-11 { background-color: rgba(255,105,180,0.3); } 
-
-  .tooltip {
-    position: relative;
-    cursor: help;
-  }
-
-  .tooltip:hover::after {
-    content: attr(data-tooltip);
-    position: absolute;
-    background: #333;
-    color: #fff;
-    padding: 3px 8px;
-    border-radius: 4px;
-    top: -25px;
-    left: 0;
-    white-space: nowrap;
-    font-size: 12px;
-    z-index: 10;
-  }
+  .rule-8 { text-decoration: underline red; } /* spelling underline */
+  .tooltip { position:relative; cursor:help; }
+  .tooltip:hover::after { content: attr(data-tooltip); position:absolute; background:#333; color:#fff; padding:3px 8px; border-radius:4px; top:-25px; left:0; white-space:nowrap; font-size:12px; z-index:10; }
 </style>
 </head>
 <body>
 <h1>Twain Editor</h1>
 <div class="editor-container">
-  <div id="highlight" class="highlighted-text"></div>
-  <textarea id="editor" placeholder="Write like Twain would..."></textarea>
+  <div id="editor" contenteditable="true" spellcheck="false" placeholder="Write like Twain would..."></div>
 </div>
 <div style="display:flex; justify-content:space-between; max-width:900px; margin:auto; margin-top:10px;">
   <p id="wordCount">Word count: 0</p>
   <button id="analyzeBtn">Analyze</button>
 </div>
-<div id="feedback" class="feedback"></div>
+<div id="feedback"></div>
 
 <script>
-// Spell dictionary (simple example)
-const dictionary = ["the","and","of","to","a","in","is","it","you","that","he","was","for","on","are","as","with","his","they","I","at","be","this","have","from","or","one","had","by","word","but","not","what","all","were","we","when","your","can","said","there","use","an","each","which","she","do","how","their","if","will","up","other","about","out","many","then","them","these","so","some","her","would","make","like","him","into","time","has","look","two","more","write","go","see","number","no","way","could","people","my","than","first","water","been","call","who","oil","its","now","find","long","down","day","did","get","come","made","may","part"]; // expand as needed
-
-const textarea = document.getElementById('editor');
-const highlightDiv = document.getElementById('highlight');
+const editor = document.getElementById('editor');
 const feedbackDiv = document.getElementById('feedback');
 const wordCountP = document.getElementById('wordCount');
 
-// Combine original and new rules
+// Rules with colors
 const rules = [
-  { regex: /\b(utilize|commence|ascertain|ameliorate|endeavor|employ|emolument)\b/gi, message: "Use simpler words." },
-  { regex: /\b\w+ly\b/gi, message: "Too many adjectives/adverbs." },
-  { regex: /\bvery\b/gi, message: "Consider 'damn' instead of 'very'." },
-  { regex: /\balmost right\b/gi, message: "Choose the precise word (almost right vs right)." },
-  { regex: /\b(\w)\w*\s+\1\w*\b/gi, message: "Alliteration detected." },
-  { regex: /\b(once in a lifetime|at the end of the day|in the nick of time|old hat|like a plague)\b/gi, message: "Avoid clichés." },
-  { regex: /\b(redundant|unnecessary|superfluous|obfuscates|more words than necessary)\b/gi, message: "Avoid redundancy." },
-  { regex: /\?\s*$/g, message: "Avoid rhetorical questions." },
-  { regex: /\b(nearly|extremely|tremendously|huge|gigantic)\b/gi, message: "Avoid exaggeration." },
-  { regex: /\b(five-dollar word|fifty-cent word)\b/gi, message: "Don't use a five-dollar word when a fifty-cent word will do." },
-  { regex: /\b(plain, simple language|short words|brief sentences)\b/gi, message: "Prefer plain, simple language, short words, and brief sentences." },
-  { regex: /\b(prepositions at sentence end)\b/gi, message: "Avoid ending sentences with prepositions." }
+  { regex: /\b(utilize|commence|ascertain|ameliorate|endeavor|employ|emolument)\b/gi, message:"Use simpler words." },
+  { regex: /\b\w+ly\b/gi, message:"Too many adjectives/adverbs." },
+  { regex: /\bvery\b/gi, message:"Consider 'damn' instead of 'very'." },
+  { regex: /\balmost right\b/gi, message:"Choose the precise word." },
+  { regex: /\b(\w)\w*\s+\1\w*\b/gi, message:"Alliteration detected." },
+  { regex: /\b(once in a lifetime|at the end of the day|in the nick of time|old hat|like a plague)\b/gi, message:"Avoid clichés." },
+  { regex: /\b(redundant|unnecessary|superfluous|obfuscates|more words than necessary)\b/gi, message:"Avoid redundancy." },
+  { regex: /\?\s*$/g, message:"Avoid rhetorical questions." },
+  { regex: /\b(nearly|extremely|tremendously|huge|gigantic)\b/gi, message:"Avoid exaggeration." },
+  { regex: /\b(five-dollar word|fifty-cent word)\b/gi, message:"Don't use a five-dollar word when a fifty-cent word will do." },
+  { regex: /\b(plain, simple language|short words|brief sentences)\b/gi, message:"Prefer plain, simple language, short words, and brief sentences." },
+  { regex: /\b(prepositions at sentence end)\b/gi, message:"Avoid ending sentences with prepositions." }
 ];
 
+// Simple dictionary for spelling
+const dictionary = ["the","and","of","to","a","in","is","it","you","that","he","was","for","on","are","as","with","his","they","I","at","be","this","have","from","or","one","had","by","word","but","not","what","all","were","we","when","your","can","said","there","use","an","each","which","she","do","how","their","if","will","up","other","about","out","many","then","them","these","so","some","her","would","make","like","him","into","time","has","look","two","more","write","go","see","number","no","way","could","people","my","than","first","water","been","call","who","oil","its","now","find","long","down","day","did","get","come","made","may","part"];
+
+// Helper: escape HTML
 function escapeHtml(text) {
   return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
+// Spell check
 function spellCheckWords(text) {
   const words = text.split(/\s+/);
   let misspell = [];
@@ -183,46 +83,45 @@ function spellCheckWords(text) {
   return misspell;
 }
 
-function updateHighlight() {
-  let text = escapeHtml(textarea.value);
-  let applied = new Set();
+// Highlight text
+function highlightText() {
+  let text = escapeHtml(editor.innerText);
+  let foundSet = new Set();
 
   rules.forEach((rule, idx) => {
     text = text.replace(rule.regex, match => {
-      if(applied.has(match)) return match;
-      applied.add(match);
+      if(foundSet.has(match)) return match;
+      foundSet.add(match);
       return `<span class="tooltip rule-${idx}" data-tooltip="${rule.message}">${match}</span>`;
     });
   });
 
-  // Spell check highlights
-  const misspelled = spellCheckWords(textarea.value);
+  const misspelled = spellCheckWords(editor.innerText);
   misspelled.forEach(word => {
     const regex = new RegExp(`\\b${word}\\b`, 'g');
     text = text.replace(regex, `<span class="tooltip rule-8" data-tooltip="Spelling mistake">${word}</span>`);
   });
 
-  highlightDiv.innerHTML = text.replace(/\n/g,'<br>');
+  editor.innerHTML = text.replace(/\n/g,'<br>');
+  updateWordCount();
 }
 
-textarea.addEventListener('input', () => {
-  updateHighlight();
-  wordCountP.textContent = "Word count: " + (textarea.value.trim() ? textarea.value.trim().split(/\s+/).length : 0);
-});
+// Update word count
+function updateWordCount() {
+  wordCountP.textContent = "Word count: " + (editor.innerText.trim() ? editor.innerText.trim().split(/\s+/).length : 0);
+}
 
+editor.addEventListener('input', () => { highlightText(); });
 document.getElementById('analyzeBtn').addEventListener('click', () => {
   let found = [];
-  rules.forEach(rule => {
-    if(rule.regex.test(textarea.value)) found.push(rule.message);
-    rule.regex.lastIndex = 0;
-  });
-  const misspelled = spellCheckWords(textarea.value);
+  rules.forEach(rule => { if(rule.regex.test(editor.innerText)) found.push(rule.message); rule.regex.lastIndex = 0; });
+  const misspelled = spellCheckWords(editor.innerText);
   misspelled.forEach(w => found.push(`Spelling mistake: ${w}`));
-  feedbackDiv.innerHTML = found.length ? found.map(m => `<div>${m}</div>`).join('') : "No issues found — Twain would nod!";
+  feedbackDiv.innerHTML = found.length ? found.map(m=>`<div>${m}</div>`).join('') : "No issues found — Twain would nod!";
 });
 
 // Initial highlight
-updateHighlight();
+highlightText();
 </script>
 </body>
 </html>
