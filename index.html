@@ -46,7 +46,7 @@ button:hover { background:#005fa3; }
 <div id="feedback"></div>
 
 <script>
-// Spell dictionary (expanded)
+// Expanded dictionary
 const dictionary = new Set([
   "the","and","of","to","a","in","is","it","you","that","he","was","for","on","are","as","with","his",
   "they","i","at","be","this","have","from","or","one","had","by","word","but","not","what","all","were",
@@ -57,33 +57,32 @@ const dictionary = new Set([
   "made","may","part","plain","simple","language","short","words","brief","sentences","almost","right",
   "very","damn","redundant","unnecessary","superfluous","obfuscates","exaggeration","alliteration","comparison",
   "cliche","spelling","error"
-  // Add more words here for more coverage
 ]);
 
 const editor = document.getElementById('editor');
 const feedbackDiv = document.getElementById('feedback');
 const wordCountP = document.getElementById('wordCount');
 
-// Rules with message & color index
 const rules = [
-  { regex: /\b(utilize|commence|ascertain|ameliorate|endeavor|employ|emolument)\b/gi, message:"Use simpler words.", color:0 },
-  { regex: /\b\w+ly\b/gi, message:"Too many adjectives/adverbs.", color:1 },
-  { regex: /\bvery\b/gi, message:"Consider 'damn' instead of 'very'.", color:2 },
-  { regex: /\balmost right\b/gi, message:"Choose the precise word.", color:3 },
-  { regex: /\b(\w)\w*\s+\1\w*\b/gi, message:"Alliteration detected.", color:4 },
-  { regex: /\b(once in a lifetime|at the end of the day|in the nick of time|old hat|like a plague)\b/gi, message:"Avoid clichés.", color:5 },
-  { regex: /\b(redundant|unnecessary|superfluous|obfuscates|more words than necessary)\b/gi, message:"Avoid redundancy.", color:6 },
-  { regex: /\?\s*$/g, message:"Avoid rhetorical questions.", color:7 },
-  { regex: /\b(nearly|extremely|tremendously|huge|gigantic)\b/gi, message:"Avoid exaggeration.", color:8 },
-  { regex: /\b(five-dollar word|fifty-cent word)\b/gi, message:"Don't use a five-dollar word when a fifty-cent word will do.", color:9 },
-  { regex: /\b(plain, simple language|short words|brief sentences)\b/gi, message:"Prefer plain, simple language, short words, and brief sentences.", color:10 },
-  { regex: /\b(prepositions at sentence end)\b/gi, message:"Avoid ending sentences with prepositions.", color:11 }
+  { regex: /\b(utilize|commence|ascertain|ameliorate|endeavor|employ|emolument)\b/gi, message:"Ah! Use simpler words, dear friend.", color:0 },
+  { regex: /\b\w+ly\b/gi, message:"Too many adjectives! Twain would frown.", color:1 },
+  { regex: /\bvery\b/gi, message:"Replace 'very' with 'damn', as Twain might advise.", color:2 },
+  { regex: /\balmost right\b/gi, message:"Choose the precise word — like a lightning bug vs lightning.", color:3 },
+  { regex: /\b(\w)\w*\s+\1\w*\b/gi, message:"Alliteration spotted! Twain abhors repetition.", color:4 },
+  { regex: /\b(once in a lifetime|at the end of the day|in the nick of time|old hat|like a plague)\b/gi, message:"Avoid clichés — originality is king.", color:5 },
+  { regex: /\b(redundant|unnecessary|superfluous|obfuscates|more words than necessary)\b/gi, message:"Cut the fluff! Brevity wins.", color:6 },
+  { regex: /\?\s*$/g, message:"Rhetorical questions are seldom needed, Twain would say.", color:7 },
+  { regex: /\b(nearly|extremely|tremendously|huge|gigantic)\b/gi, message:"Exaggeration detected — understatement is safer.", color:8 },
+  { regex: /\b(five-dollar word|fifty-cent word)\b/gi, message:"Don't use a five-dollar word when a fifty-cent one will do.", color:9 },
+  { regex: /\b(plain, simple language|short words|brief sentences)\b/gi, message:"Plain, simple language is always wise.", color:10 },
+  { regex: /\b(prepositions at sentence end)\b/gi, message:"Avoid ending sentences with prepositions — classic trap!", color:11 }
 ];
 
 function escapeHtml(text) {
   return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
+// Spell check
 function spellCheckWords(text) {
   const words = text.split(/\s+/);
   let misspell = [];
@@ -94,14 +93,50 @@ function spellCheckWords(text) {
   return misspell;
 }
 
-// Highlight text with colors & build annotations
+// Preserve caret position
+function saveCaret(containerEl) {
+  const selection = window.getSelection();
+  if(selection.rangeCount === 0) return null;
+  const range = selection.getRangeAt(0);
+  const preSelectionRange = range.cloneRange();
+  preSelectionRange.selectNodeContents(containerEl);
+  preSelectionRange.setEnd(range.startContainer, range.startOffset);
+  const start = preSelectionRange.toString().length;
+  return start;
+}
+
+function restoreCaret(containerEl, pos) {
+  let nodeStack = [containerEl], node, foundStart=false, charIndex=0, range=document.createRange();
+  range.setStart(containerEl,0);
+  range.collapse(true);
+  while(nodeStack.length>0) {
+    node = nodeStack.pop();
+    if(node.nodeType==3){
+      const nextCharIndex = charIndex + node.length;
+      if(!foundStart && pos >= charIndex && pos <= nextCharIndex){
+        range.setStart(node, pos - charIndex);
+        range.collapse(true);
+        foundStart=true;
+        break;
+      }
+      charIndex = nextCharIndex;
+    } else {
+      let i=node.childNodes.length-1;i>=0;i--) nodeStack.push(node.childNodes[i]);
+    }
+  }
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+}
+
 function highlightText() {
-  const text = escapeHtml(editor.innerText);
+  const caretPos = saveCaret(editor);
+  let text = escapeHtml(editor.innerText);
   let html = text;
   let annotations = [];
-
   const appliedSet = new Set();
-  rules.forEach((rule, idx) => {
+
+  rules.forEach(rule => {
     html = html.replace(rule.regex, match => {
       if(appliedSet.has(match)) return match;
       appliedSet.add(match);
@@ -110,7 +145,6 @@ function highlightText() {
     });
   });
 
-  // Spell check
   const misspelled = spellCheckWords(editor.innerText);
   misspelled.forEach(word => {
     const regex = new RegExp(`\\b${word}\\b`, 'g');
@@ -120,16 +154,15 @@ function highlightText() {
 
   editor.innerHTML = html.replace(/\n/g,'<br>');
 
-  // Show colored annotations at bottom
   feedbackDiv.innerHTML = annotations.map(a => `<div style="background-color: rgba(${a.color*20},${255-a.color*20},${a.color*10},0.3); padding:3px 5px; margin-bottom:2px;">${a.message}: ${a.text}</div>`).join('');
 
   wordCountP.textContent = "Word count: " + (editor.innerText.trim() ? editor.innerText.trim().split(/\s+/).length : 0);
+  restoreCaret(editor, caretPos);
 }
 
 editor.addEventListener('input', highlightText);
 document.getElementById('analyzeBtn').addEventListener('click', highlightText);
 
-// Initial
 highlightText();
 </script>
 </body>
