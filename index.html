@@ -46,10 +46,13 @@ button:hover { background:#005fa3; }
   align-items: flex-start;
   gap: 6px;
   opacity: 0;
-  transform: translateY(20px) scale(0.98);
-  animation: fadeInScroll 1s ease forwards;
+  transform: translateY(15px);
+  animation: fadeInOnce 1s ease forwards;
 }
-
+@keyframes fadeInOnce {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 .twain-bubble .quote {
   font-size: 24px;
   line-height: 1;
@@ -59,13 +62,6 @@ button:hover { background:#005fa3; }
 /* Typewriter block cursor */
 @keyframes blink { 0%,50%,100% {opacity:1;} 25%,75% {opacity:0;} }
 #editor-caret { display:inline-block; width:8px; background:black; animation:blink 1s step-end infinite; vertical-align:text-bottom; }
-
-/* Speech bubble animation */
-@keyframes fadeInScroll {
-  0% { opacity: 0; transform: translateY(20px) scale(0.98) rotate(-1deg); filter: brightness(0.95); }
-  40% { opacity: 0.6; transform: translateY(10px) scale(1.01); filter: brightness(1.05); }
-  100% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); filter: brightness(1); }
-}
 
 /* Mobile responsiveness */
 @media (max-width: 600px) {
@@ -106,17 +102,17 @@ button:hover { background:#005fa3; }
 
 <script>
 const rules = [
-  { regex: /\b(utilize|commence|ascertain|ameliorate|endeavor|employ|emolument)\b/gi, message:"Never use a five-dollar word when a fifty-cent one suffices, dear friend.", color:0 },
+  { regex: /\b(utilize|commence|ascertain|ameliorate|endeavor|employ|emolument|leverage|facilitate)\b/gi, message:"Never use a five-dollar word when a fifty-cent one suffices, dear friend.", color:0 },
   { regex: /\b\w+ly\b/gi, message:"Twain frowns upon adjectives and adverbs: keep it simple!", color:1 },
   { regex: /\bvery\b/gi, message:"Swap 'very' for 'damn' — but once is plenty.", color:2 },
-  { regex: /\balmost right\b/gi, message:"Choose the precise word — the lightning bug is not lightning.", color:3 },
+  { regex: /\balmost right\b|\bclose enough\b|\bkind of right\b/gi, message:"Choose the precise word — the lightning bug is not lightning.", color:3 },
   { regex: /\b(\w)\w*\s+\1\w*\b/gi, message:"Alliteration! Twain abhors doubling letters for effect.", color:4 },
-  { regex: /\b(once in a lifetime|at the end of the day|in the nick of time|old hat|like a plague)\b/gi, message:"Clichés are the death of originality!", color:5 },
-  { regex: /\b(redundant|unnecessary|superfluous|obfuscates|more words than necessary)\b/gi, message:"Trim the fluff, my friend. Brevity wins.", color:6 },
-  { regex: /\?\s*$/g, message:"Rhetorical questions? Twain rolls his eyes.", color:7 },
-  { regex: /\b(nearly|extremely|tremendously|huge|gigantic)\b/gi, message:"Exaggeration detected; less is more.", color:8 },
-  { regex: /\b(five-dollar word|fifty-cent word)\b/gi, message:"Use words that carry meaning without pomp.", color:9 },
-  { regex: /\b(plain, simple language|short words|brief sentences)\b/gi, message:"Simplicity is the soul of writing.", color:10 },
+  { regex: /\b(once in a lifetime|at the end of the day|in the nick of time|old hat|like the plague|avoid like the plague|last but not least)\b/gi, message:"Clichés are the death of originality!", color:5 },
+  { regex: /\b(redundant|unnecessary|superfluous|obfuscates|more words than necessary|wordy|verbose)\b/gi, message:"Trim the fluff, my friend. Brevity wins.", color:6 },
+  { regex: /\?\s*$/gm, message:"Rhetorical questions? Twain rolls his eyes.", color:7 },
+  { regex: /\b(nearly|extremely|tremendously|huge|gigantic|massive|enormous|unbelievably)\b/gi, message:"Exaggeration detected; less is more.", color:8 },
+  { regex: /\b(precisely|exactly|just right|spot on)\b/gi, message:"Choose your words with care — simplicity is power.", color:9 },
+  { regex: /\b(plain, simple language|short words|brief sentences|clear|concise)\b/gi, message:"Simplicity is the soul of writing.", color:10 },
   { regex: /\b\w+(?:\s+\w+)*\s+(?:in|on|at|with|from|to|about)\s*$/gim, message:"Avoid ending sentences with prepositions!", color:11 }
 ];
 
@@ -171,7 +167,7 @@ function highlightText(){
   feedbackDiv.innerHTML=[...seenRules].map(color=>{
     const rule=rules.find(r=>r.color===color);
     const ruleColor=getComputedStyle(document.querySelector(`.rule-${color}`)).backgroundColor;
-    return `<div class="twain-bubble" style="background-color:${ruleColor}; border-color:${ruleColor}; animation-delay:${Math.random()*0.5}s;">
+    return `<div class="twain-bubble" style="background-color:${ruleColor}; border-color:${ruleColor};">
       <span class="quote" style="color:${ruleColor};">“</span>
       <div><strong>Twain says:</strong> ${rule.message}</div>
       <span class="quote" style="color:${ruleColor};">”</span>
@@ -179,7 +175,7 @@ function highlightText(){
   }).join('');
 
   wordCountP.textContent="Word count: "+(text.trim()?text.trim().split(/\s+/).length:0);
-  localStorage.setItem("twainText", text); // Save text
+  localStorage.setItem("twainText", text);
   restoreCaret(editor,caretPos);
 }
 rules.forEach(r=>{
@@ -193,11 +189,8 @@ editor.addEventListener('keydown', e=>{
 editor.addEventListener('input',highlightText);
 document.getElementById('analyzeBtn').addEventListener('click',highlightText);
 
-// Restore saved text
 const savedText = localStorage.getItem("twainText");
-if (savedText) {
-  editor.innerText = savedText;
-}
+if (savedText) editor.innerText = savedText;
 highlightText();
 </script>
 </body>
