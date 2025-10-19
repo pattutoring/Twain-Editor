@@ -76,7 +76,7 @@ button:hover { background:#005fa3; }
 const rules = [
   { regex: /\b(utilize|commence|ascertain|ameliorate|endeavor|employ|emolument)\b/gi, message:"Never use a five-dollar word when a fifty-cent one suffices, dear friend.", color:0 },
   { regex: /\b\w+ly\b/gi, message:"Twain frowns upon adjectives and adverbs: keep it simple!", color:1 },
-  { regex: /\bvery\b/gi, message:"Swap 'very' for 'damn', as a Twain-approved shortcut.", color:2 },
+  { regex: /\bvery\b/gi, message:"Swap 'very' for 'damn' — but once is plenty, don't overdo it.", color:2 },
   { regex: /\balmost right\b/gi, message:"Choose the precise word — the lightning bug is not lightning.", color:3 },
   { regex: /\b(\w)\w*\s+\1\w*\b/gi, message:"Alliteration! Twain abhors doubling letters for effect.", color:4 },
   { regex: /\b(once in a lifetime|at the end of the day|in the nick of time|old hat|like a plague)\b/gi, message:"Clichés are the death of originality!", color:5 },
@@ -134,11 +134,11 @@ function highlightText(){
   const caretPos=saveCaret(editor);
   const text=editor.innerText;
   let html=escapeHtml(text);
-  let annotations=[];
+  let seenRules=new Set();
 
   rules.forEach(r=>{
     html=html.replace(r.regex,match=>{
-      annotations.push({text:match,message:r.message,color:r.color});
+      seenRules.add(r.color);
       return `<span class="tooltip rule-${r.color}" data-tooltip="${r.message}">${match}</span>`;
     });
   });
@@ -146,14 +146,16 @@ function highlightText(){
   editor.innerHTML=html.replace(/\n/g,'<br>');
   updateLineNumbers(text);
 
-  // Feedback annotations color-matched
-  feedbackDiv.innerHTML=annotations.map(a=>`<div style="background-color: rgba(${a.color*20},${255-a.color*20},${a.color*10},0.3); padding:3px 5px; margin-bottom:2px;"><strong style="color:rgba(${a.color*20},${255-a.color*20},${a.color*10},1);">Twain says:</strong> ${a.message} ➤ ${a.text}</div>`).join('');
-  wordCountP.textContent="Word count: "+(text.trim()?text.trim().split(/\s+/).length:0);
+  feedbackDiv.innerHTML=[...seenRules].map(color=>{
+    const rule=rules.find(r=>r.color===color);
+    return `<div style="background-color: rgba(${color*20},${255-color*20},${color*10},0.3); padding:3px 5px; margin-bottom:2px;"><strong style="color:rgba(${color*20},${255-color*20},${color*10},1);">Twain says:</strong> ${rule.message}</div>`;
+  }).join('');
 
+  wordCountP.textContent="Word count: "+(text.trim()?text.trim().split(/\s+/).length:0);
   restoreCaret(editor,caretPos);
 }
 
-// Populate rules reference list with color matching
+// Populate rules reference list
 rules.forEach(r=>{
   const li=document.createElement('li');
   li.innerHTML=`<span class="rule-${r.color}">${r.message}</span>`;
