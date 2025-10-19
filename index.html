@@ -1,197 +1,211 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Twain Editor</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-body { font-family: "Courier New", monospace; background: #fdf6e3; margin: 10px; }
-h1 { text-align: center; font-size: 2em; margin-bottom: 15px; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
-.editor-container { max-width: 100%; margin:auto; background:#fdf6e3; padding:0; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.1); display:flex; flex-direction:row; }
-.line-numbers { background:#eee; padding:10px 5px; text-align:right; user-select:none; color:#666; font-size:14px; line-height:1.5; }
-#editor { flex:1; min-height:200px; font-family:"Courier New", monospace; font-size:16px; padding:10px; border:none; line-height:1.5; white-space:pre-wrap; outline:none; position:relative; caret-color:black; word-break:break-word; }
-#editor:focus { outline:none; }
-#editor:empty:before { content: attr(data-placeholder); color: #999; }
-#feedback { margin-top:15px; padding:10px; border-radius:8px; max-width:100%; margin-left:auto; margin-right:auto; display:flex; flex-direction:column; gap:10px; }
-button { margin-top:10px; padding:8px 16px; font-size:14px; cursor:pointer; background:#0074D9; color:white; border:none; border-radius:6px; transition:0.2s; }
-button:hover { background:#005fa3; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Write Like Mark Twain</title>
+  <style>
+    body {
+      font-family: "Courier New", monospace;
+      background-color: #f5f2e8;
+      color: #3b2f2f;
+      padding: 20px;
+      line-height: 1.6;
+    }
 
-/* Rule highlights */
-.rule-0 { background-color: rgba(255,0,0,0.3); }
-.rule-1 { background-color: rgba(255,165,0,0.3); }
-.rule-2 { background-color: rgba(255,255,0,0.3); }
-.rule-3 { background-color: rgba(0,128,0,0.3); }
-.rule-4 { background-color: rgba(0,255,255,0.3); }
-.rule-5 { background-color: rgba(0,0,255,0.3); }
-.rule-6 { background-color: rgba(128,0,128,0.3); }
-.rule-7 { background-color: rgba(255,192,203,0.3); }
-.rule-8 { background-color: rgba(200,200,0,0.3); }
-.rule-9 { background-color: rgba(128,128,0,0.3); }
-.rule-10 { background-color: rgba(0,128,128,0.3); }
-.rule-11 { background-color: rgba(255,105,180,0.3); }
+    h1 {
+      font-family: "Georgia", serif;
+      text-align: center;
+      color: #4b2e05;
+    }
 
-/* Speech bubbles */
-.twain-bubble {
-  position: relative;
-  border: 2px solid #000;
-  border-radius: 12px;
-  padding: 10px 14px 12px 14px;
-  font-family: "Georgia", serif;
-  font-size: 15px;
-  line-height: 1.4;
-  max-width: 600px;
-  margin: auto;
-  box-shadow: 3px 3px 0px rgba(0,0,0,0.2);
-  display: flex;
-  align-items: flex-start;
-  gap: 6px;
-  opacity: 0;
-  transform: translateY(15px);
-  animation: fadeInOnce 1s ease forwards;
-}
-@keyframes fadeInOnce {
-  from { opacity: 0; transform: translateY(15px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.twain-bubble .quote {
-  font-size: 24px;
-  line-height: 1;
-  margin-top: 2px;
-}
+    #editorContainer {
+      position: relative;
+      margin: 20px auto;
+      width: 90%;
+      max-width: 800px;
+    }
 
-/* Typewriter block cursor */
-@keyframes blink { 0%,50%,100% {opacity:1;} 25%,75% {opacity:0;} }
-#editor-caret { display:inline-block; width:8px; background:black; animation:blink 1s step-end infinite; vertical-align:text-bottom; }
+    #editor {
+      width: 100%;
+      min-height: 250px;
+      background: #fffaf3;
+      border: 2px solid #a68a64;
+      padding: 10px 50px 10px 60px;
+      resize: vertical;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      font-size: 16px;
+      line-height: 1.6;
+      box-sizing: border-box;
+      outline: none;
+      caret-color: transparent;
+    }
 
-/* Mobile responsiveness */
-@media (max-width: 600px) {
-  .editor-container { flex-direction: column; }
-  .line-numbers { text-align:left; padding-left:5px; font-size:12px; }
-  #editor { min-height:150px; font-size:14px; padding:8px; }
-  button { font-size:12px; padding:6px 12px; }
-  h1 { font-size:1.5em; }
-  .twain-bubble { font-size:13px; padding:8px 12px; }
-}
+    .cursor {
+      display: inline-block;
+      width: 10px;
+      height: 18px;
+      background-color: #000;
+      margin-left: 2px;
+      animation: blink 1s steps(1) infinite;
+      vertical-align: bottom;
+    }
 
-.rule-list { max-width:800px; margin:auto; margin-top:20px; padding:10px; background:#fff8dc; border-radius:6px; box-shadow:0 1px 5px rgba(0,0,0,0.1); }
-.rule-list h2 { text-align:center; margin-bottom:10px; }
-.rule-list ul { list-style:none; padding-left:0; }
-.rule-list li { margin-bottom:5px; padding:4px; border-radius:4px; }
-.rule-list li span { font-weight:bold; padding:2px 5px; border-radius:4px; }
-</style>
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    #lineNumbers {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 40px;
+      background-color: #f0e6d2;
+      color: #8b7355;
+      text-align: right;
+      padding: 10px 5px;
+      font-size: 16px;
+      line-height: 1.6;
+      user-select: none;
+      border-right: 1px solid #cbb79e;
+    }
+
+    .highlight-yellow { background-color: #fff59d; }
+    .highlight-pink { background-color: #f8bbd0; }
+    .highlight-green { background-color: #c8e6c9; }
+    .highlight-blue { background-color: #bbdefb; }
+    .highlight-orange { background-color: #ffe0b2; }
+    .highlight-purple { background-color: #e1bee7; }
+
+    .annotation {
+      margin: 10px 0;
+      padding: 8px;
+      border-radius: 8px;
+      font-style: italic;
+      max-width: 80%;
+    }
+
+    .annotation.yellow { background-color: #fff59d; }
+    .annotation.pink { background-color: #f8bbd0; }
+    .annotation.green { background-color: #c8e6c9; }
+    .annotation.blue { background-color: #bbdefb; }
+    .annotation.orange { background-color: #ffe0b2; }
+    .annotation.purple { background-color: #e1bee7; }
+
+    #annotations {
+      margin-top: 20px;
+    }
+
+    #rulesList {
+      margin-top: 30px;
+      background: #fffaf0;
+      padding: 10px;
+      border-left: 4px solid #a67b5b;
+    }
+  </style>
 </head>
 <body>
-<h1>Twain Editor</h1>
-<div class="editor-container">
-  <div class="line-numbers" id="lineNumbers">1</div>
-  <div id="editor" contenteditable="true" data-placeholder="Write like Mark Twain..."></div>
-</div>
-<div style="display:flex; justify-content:space-between; max-width:100%; margin:auto; margin-top:10px;">
-  <p id="wordCount">Word count: 0</p>
-  <button id="analyzeBtn">Analyze</button>
-</div>
-<div id="feedback"></div>
+  <h1>Write Like Mark Twain</h1>
 
-<!-- Rules reference list -->
-<div class="rule-list">
-  <h2>Rules to Keep in Mind</h2>
-  <ul id="rulesReference"></ul>
-</div>
+  <div id="editorContainer">
+    <div id="lineNumbers"></div>
+    <div id="editor" contenteditable="true" spellcheck="false"></div>
+    <span class="cursor" id="cursor"></span>
+  </div>
 
-<audio id="typeSound" src="https://www.soundjay.com/mechanical/typewriter-key-1.mp3" preload="auto"></audio>
+  <div id="annotations"></div>
 
-<script>
-const rules = [
-  { regex: /\b(utilize|commence|ascertain|ameliorate|endeavor|employ|emolument|leverage|facilitate)\b/gi, message:"Never use a five-dollar word when a fifty-cent one suffices, dear friend.", color:0 },
-  { regex: /\b\w+ly\b/gi, message:"Twain frowns upon adjectives and adverbs: keep it simple!", color:1 },
-  { regex: /\bvery\b/gi, message:"Swap 'very' for 'damn' — but once is plenty.", color:2 },
-  { regex: /\balmost right\b|\bclose enough\b|\bkind of right\b/gi, message:"Choose the precise word — the lightning bug is not lightning.", color:3 },
-  { regex: /\b(\w)\w*\s+\1\w*\b/gi, message:"Alliteration! Twain abhors doubling letters for effect.", color:4 },
-  { regex: /\b(once in a lifetime|at the end of the day|in the nick of time|old hat|like the plague|avoid like the plague|last but not least)\b/gi, message:"Clichés are the death of originality!", color:5 },
-  { regex: /\b(redundant|unnecessary|superfluous|obfuscates|more words than necessary|wordy|verbose)\b/gi, message:"Trim the fluff, my friend. Brevity wins.", color:6 },
-  { regex: /\?\s*$/gm, message:"Rhetorical questions? Twain rolls his eyes.", color:7 },
-  { regex: /\b(nearly|extremely|tremendously|huge|gigantic|massive|enormous|unbelievably)\b/gi, message:"Exaggeration detected; less is more.", color:8 },
-  { regex: /\b(precisely|exactly|just right|spot on)\b/gi, message:"Choose your words with care — simplicity is power.", color:9 },
-  { regex: /\b(plain, simple language|short words|brief sentences|clear|concise)\b/gi, message:"Simplicity is the soul of writing.", color:10 },
-  { regex: /\b\w+(?:\s+\w+)*\s+(?:in|on|at|with|from|to|about)\s*$/gim, message:"Avoid ending sentences with prepositions!", color:11 }
-];
+  <div id="rulesList">
+    <h3>Mark Twain’s Rules of Writing:</h3>
+    <ul>
+      <li>Never use a five-dollar word when a fifty-cent word will do.</li>
+      <li>Use plain, simple language, short words, and brief sentences.</li>
+      <li>Be cautious with adjectives — one is plenty.</li>
+      <li>Substitute “damn” for “very.”</li>
+      <li>The difference between the almost right word and the right word is like the difference between the lightning bug and lightning.</li>
+      <li>Avoid alliteration always.</li>
+      <li>Prepositions are not words to end sentences with.</li>
+      <li>Avoid clichés like the plague.</li>
+      <li>Comparisons are as bad as clichés.</li>
+      <li>Be specific — never generalize.</li>
+      <li>Don’t be redundant; it’s superfluous and obfuscates meaning.</li>
+      <li>Who needs rhetorical questions?</li>
+      <li>Exaggeration is a billion times worse than understatement.</li>
+      <li>Simplicity is the soul of writing.</li>
+    </ul>
+  </div>
 
-const editor=document.getElementById('editor');
-const feedbackDiv=document.getElementById('feedback');
-const wordCountP=document.getElementById('wordCount');
-const lineNumbers=document.getElementById('lineNumbers');
-const typeSound=document.getElementById('typeSound');
-const rulesRefList=document.getElementById('rulesReference');
+  <script>
+    const editor = document.getElementById("editor");
+    const annotationsDiv = document.getElementById("annotations");
+    const lineNumbers = document.getElementById("lineNumbers");
+    const cursor = document.getElementById("cursor");
 
-function escapeHtml(text){ return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function saveCaret(containerEl){
-  const sel=window.getSelection(); if(sel.rangeCount===0) return null;
-  const range=sel.getRangeAt(0); const pre=range.cloneRange();
-  pre.selectNodeContents(containerEl); pre.setEnd(range.startContainer,range.startOffset);
-  return pre.toString().length;
-}
-function restoreCaret(containerEl,pos){
-  let nodes=[containerEl],node,found=false,charIndex=0,range=document.createRange();
-  range.setStart(containerEl,0);range.collapse(true);
-  while(nodes.length>0){
-    node=nodes.pop();
-    if(node.nodeType===3){
-      const next=charIndex+node.length;
-      if(!found && pos>=charIndex && pos<=next){range.setStart(node,pos-charIndex);range.collapse(true);found=true;break;}
-      charIndex=next;
-    } else {for(let i=node.childNodes.length-1;i>=0;i--) nodes.push(node.childNodes[i]);}
-  }
-  const sel=window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
-}
-function updateLineNumbers(text){
-  const lines=text.split(/\n/).length;
-  let nums=""; for(let i=1;i<=lines;i++) nums+=i+"\n";
-  lineNumbers.innerText=nums;
-}
-function highlightText(){
-  const caretPos=saveCaret(editor);
-  const text=editor.innerText;
-  let html=escapeHtml(text);
-  let seenRules=new Set();
+    // Restore saved text
+    editor.textContent = localStorage.getItem("twainText") || "Write like Mark Twain...";
 
-  rules.forEach(r=>{
-    html=html.replace(r.regex,match=>{
-      seenRules.add(r.color);
-      return `<span class="rule-${r.color}">${match}</span>`;
+    editor.addEventListener("input", () => {
+      localStorage.setItem("twainText", editor.textContent);
+      analyzeText();
     });
-  });
 
-  editor.innerHTML=html.replace(/\n/g,'<br>');
-  updateLineNumbers(text);
+    editor.addEventListener("scroll", () => {
+      lineNumbers.scrollTop = editor.scrollTop;
+    });
 
-  feedbackDiv.innerHTML=[...seenRules].map(color=>{
-    const rule=rules.find(r=>r.color===color);
-    const ruleColor=getComputedStyle(document.querySelector(`.rule-${color}`)).backgroundColor;
-    return `<div class="twain-bubble" style="background-color:${ruleColor}; border-color:${ruleColor};">
-      <span class="quote" style="color:${ruleColor};">“</span>
-      <div><strong>Twain says:</strong> ${rule.message}</div>
-      <span class="quote" style="color:${ruleColor};">”</span>
-    </div>`;
-  }).join('');
+    function updateLineNumbers() {
+      const lines = editor.textContent.split(/\n/).length;
+      lineNumbers.innerHTML = Array.from({ length: lines }, (_, i) => i + 1).join("<br>");
+    }
 
-  wordCountP.textContent="Word count: "+(text.trim()?text.trim().split(/\s+/).length:0);
-  localStorage.setItem("twainText", text);
-  restoreCaret(editor,caretPos);
-}
-rules.forEach(r=>{
-  const li=document.createElement('li');
-  li.innerHTML=`<span class="rule-${r.color}">${r.message}</span>`;
-  rulesRefList.appendChild(li);
-});
-editor.addEventListener('keydown', e=>{
-  if(e.key.length===1 || e.key==="Backspace" || e.key==="Enter") {typeSound.currentTime=0; typeSound.play();}
-});
-editor.addEventListener('input',highlightText);
-document.getElementById('analyzeBtn').addEventListener('click',highlightText);
+    function analyzeText() {
+      const text = editor.textContent;
+      updateLineNumbers();
+      annotationsDiv.innerHTML = "";
 
-const savedText = localStorage.getItem("twainText");
-if (savedText) editor.innerText = savedText;
-highlightText();
-</script>
+      const patterns = [
+        { regex: /\bvery\b/gi, color: "pink", note: '"Twain growls: “Replace ‘very’ with something stronger—or damn it altogether.”"' },
+        { regex: /\bexaggeration\b|\boverly\b|\bincredibly\b|\bextremely\b|\bso much\b/gi, color: "orange", note: '"Twain scoffs: “Don’t stretch the truth till it snaps.”"' },
+        { regex: /\bperhaps\b|\bmaybe\b|\bsomehow\b|\bsomewhere\b/gi, color: "blue", note: '"Twain quips: “Don’t hedge your bets. Be certain or be quiet.”"' },
+        { regex: /\butilize\b|\bcommence\b|\bendeavor\b/gi, color: "yellow", note: '"Twain chuckles: “Use plain speech, son. Start where you stand.”"' },
+        { regex: /\b(?:like the plague|old hat)\b/gi, color: "purple", note: '"Twain says: “Avoid clichés—they creak worse than an old door.”"' },
+        { regex: /\b(adjective\w*)\b/gi, color: "green", note: '"Twain warns: “Too many adjectives spoil the broth.”"' },
+        { regex: /\?\s*$/gm, color: "blue", note: '"Twain snorts: “Rhetorical questions? You already know the answer.”"' },
+        { regex: /\b(in|on|at|by|for|with|about|from|of)\.$/gmi, color: "orange", note: '"Twain wags his finger: “Avoid ending sentences with prepositions!”"' }
+      ];
+
+      let html = text;
+      patterns.forEach(rule => {
+        html = html.replace(rule.regex, match => `<span class="highlight-${rule.color}">${match}</span>`);
+        if (rule.regex.test(text)) {
+          const bubble = document.createElement("div");
+          bubble.className = `annotation ${rule.color}`;
+          bubble.innerHTML = rule.note;
+          annotationsDiv.appendChild(bubble);
+        }
+      });
+
+      editor.innerHTML = html;
+      placeCursorAtEnd();
+    }
+
+    function placeCursorAtEnd() {
+      const range = document.createRange();
+      const sel = window.getSelection();
+      range.selectNodeContents(editor);
+      range.collapse(false);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+
+    function blinkCursor() {
+      cursor.style.visibility = (cursor.style.visibility === "hidden") ? "visible" : "hidden";
+      setTimeout(blinkCursor, 600);
+    }
+    blinkCursor();
+
+    analyzeText();
+  </script>
 </body>
 </html>
