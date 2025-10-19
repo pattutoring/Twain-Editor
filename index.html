@@ -7,7 +7,7 @@
     body {
       font-family: "Courier New", Courier, monospace;
       margin: 40px;
-      background-color: #fdf6e3;
+      background-color: #fdf6e3; /* parchment background */
       color: #333;
     }
 
@@ -22,7 +22,7 @@
     #editor-container {
       margin: 20px auto;
       max-width: 900px;
-      background-color: #fffbe6;
+      background-color: #fff; /* white editor box */
       padding: 30px;
       border-radius: 12px;
       box-shadow: 0 10px 20px rgba(0,0,0,0.1);
@@ -44,9 +44,22 @@
     }
 
     .highlight {
-      background-color: #ffebcc;
       font-weight: bold;
+      cursor: help;
     }
+
+    .fancy-word { background-color: #ffe4e1; }
+    .adjective { background-color: #fffacd; }
+    .cliche { background-color: #e0ffff; }
+    .comparison { background-color: #f0fff0; }
+    .very-word { background-color: #f5f5dc; }
+    .preposition { background-color: #fafad2; }
+    .alliteration { background-color: #f0f8ff; }
+    .redundant { background-color: #ffe4b5; }
+    .rhetorical { background-color: #ffe0e0; }
+    .exaggeration { background-color: #e6e6fa; }
+    .almost-right { background-color: #d8bfd8; }
+    .spell-error { background-color: #ffcccc; text-decoration: underline wavy red; }
 
     button {
       margin-top: 10px;
@@ -73,6 +86,24 @@
       border-left: 4px solid #ffcc00;
       border-radius: 8px;
     }
+
+    [title] {
+      position: relative;
+    }
+
+    [title]:hover::after {
+      content: attr(title);
+      position: absolute;
+      background: #333;
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 14px;
+      white-space: nowrap;
+      top: -1.5em;
+      left: 0;
+      z-index: 10;
+    }
   </style>
 </head>
 <body>
@@ -81,3 +112,4 @@
   <script type="module" src="index.js"></script>
 </body>
 </html>
+
