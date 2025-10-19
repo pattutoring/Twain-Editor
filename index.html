@@ -7,18 +7,12 @@
 <style>
 body { font-family: "Courier New", monospace; background: #fdf6e3; margin: 20px; }
 h1 { text-align: center; font-size: 2.5em; margin-bottom: 20px; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
-.editor-container {
-  max-width: 900px; margin:auto; background:#fdf6e3; padding:15px; border-radius:8px;
-  box-shadow:0 2px 10px rgba(0,0,0,0.1);
-}
-#editor {
-  width: 100%; min-height:500px; font-family:"Courier New", monospace; font-size:16px;
-  padding:15px; border-radius:8px; border:1px solid #ccc; line-height:1.5;
-  white-space:pre-wrap; outline:none; caret-color:black;
-}
+.editor-container { max-width: 900px; margin:auto; background:#fdf6e3; padding:15px; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.1); }
+#editor { width: 100%; min-height:500px; font-family:"Courier New", monospace; font-size:16px; padding:15px; border-radius:8px; border:1px solid #ccc; line-height:1.5; white-space:pre-wrap; outline:none; caret-color:black; }
 #feedback { margin-top:20px; font-style:italic; padding:15px; border-radius:8px; }
 button { margin-top:10px; padding:10px 20px; font-size:16px; cursor:pointer; background:#0074D9; color:white; border:none; border-radius:8px; transition:0.2s; }
 button:hover { background:#005fa3; }
+
 .rule-0 { background-color: rgba(255,0,0,0.3); }
 .rule-1 { background-color: rgba(255,165,0,0.3); }
 .rule-2 { background-color: rgba(255,255,0,0.3); }
@@ -27,9 +21,9 @@ button:hover { background:#005fa3; }
 .rule-5 { background-color: rgba(0,0,255,0.3); }
 .rule-6 { background-color: rgba(128,0,128,0.3); }
 .rule-7 { background-color: rgba(255,192,203,0.3); }
-.rule-8 { text-decoration: underline red; } /* spelling underline */
+.rule-8 { text-decoration: underline red; }
 .rule-9 { background-color: rgba(128,128,0,0.3); }
-.rule-10 { background-color: rgba(0,128,128,0.3); } 
+.rule-10 { background-color: rgba(0,128,128,0.3); }
 .tooltip { position:relative; cursor:help; }
 .tooltip:hover::after { content: attr(data-tooltip); position:absolute; background:#333; color:#fff; padding:3px 8px; border-radius:4px; top:-25px; left:0; white-space:nowrap; font-size:12px; z-index:10; }
 </style>
@@ -37,7 +31,7 @@ button:hover { background:#005fa3; }
 <body>
 <h1>Twain Editor</h1>
 <div class="editor-container">
-  <div id="editor" contenteditable="true" spellcheck="false" placeholder="Write like Twain would..."></div>
+  <div id="editor" contenteditable="true" spellcheck="false"></div>
 </div>
 <div style="display:flex; justify-content:space-between; max-width:900px; margin:auto; margin-top:10px;">
   <p id="wordCount">Word count: 0</p>
@@ -46,23 +40,10 @@ button:hover { background:#005fa3; }
 <div id="feedback"></div>
 
 <script>
-// Expanded dictionary
-const dictionary = new Set([
-  "the","and","of","to","a","in","is","it","you","that","he","was","for","on","are","as","with","his",
-  "they","i","at","be","this","have","from","or","one","had","by","word","but","not","what","all","were",
-  "we","when","your","can","said","there","use","an","each","which","she","do","how","their","if","will",
-  "up","other","about","out","many","then","them","these","so","some","her","would","make","like","him",
-  "into","time","has","look","two","more","write","go","see","number","no","way","could","people","my",
-  "than","first","water","been","call","who","oil","its","now","find","long","down","day","did","get","come",
-  "made","may","part","plain","simple","language","short","words","brief","sentences","almost","right",
-  "very","damn","redundant","unnecessary","superfluous","obfuscates","exaggeration","alliteration","comparison",
-  "cliche","spelling","error"
-]);
+// Dictionary
+const dictionary = new Set(["the","and","of","to","a","in","is","it","you","that","he","was","for","on","are","as","with","his","they","i","at","be","this","have","from","or","one","had","by","word","but","not","what","all","were","we","when","your","can","said","there","use","an","each","which","she","do","how","their","if","will","up","other","about","out","many","then","them","these","so","some","her","would","make","like","him","into","time","has","look","two","more","write","go","see","number","no","way","could","people","my","than","first","water","been","call","who","oil","its","now","find","long","down","day","did","get","come","made","may","part","plain","simple","language","short","words","brief","sentences","almost","right","very","damn","redundant","unnecessary","superfluous","obfuscates","exaggeration","alliteration","comparison","cliche","spelling","error"]);
 
-const editor = document.getElementById('editor');
-const feedbackDiv = document.getElementById('feedback');
-const wordCountP = document.getElementById('wordCount');
-
+// Rules
 const rules = [
   { regex: /\b(utilize|commence|ascertain|ameliorate|endeavor|employ|emolument)\b/gi, message:"Ah! Use simpler words, dear friend.", color:0 },
   { regex: /\b\w+ly\b/gi, message:"Too many adjectives! Twain would frown.", color:1 },
@@ -78,91 +59,55 @@ const rules = [
   { regex: /\b(prepositions at sentence end)\b/gi, message:"Avoid ending sentences with prepositions — classic trap!", color:11 }
 ];
 
-function escapeHtml(text) {
-  return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const editor = document.getElementById('editor');
+const feedbackDiv = document.getElementById('feedback');
+const wordCountP = document.getElementById('wordCount');
+
+// Utility
+function escapeHtml(text){ return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function spellCheckWords(text){ 
+  const words = text.split(/\s+/); 
+  let misspell = []; 
+  words.forEach(w=>{ const clean = w.replace(/[^a-zA-Z]/g,'').toLowerCase(); if(clean && !dictionary.has(clean)) misspell.push(w); }); 
+  return misspell; 
 }
 
-// Spell check
-function spellCheckWords(text) {
-  const words = text.split(/\s+/);
-  let misspell = [];
-  words.forEach(w => {
-    const clean = w.replace(/[^a-zA-Z]/g,'').toLowerCase();
-    if(clean && !dictionary.has(clean)) misspell.push(w);
-  });
-  return misspell;
-}
+// Caret
+function saveCaret(containerEl){ const sel = window.getSelection(); if(sel.rangeCount===0) return null; const range = sel.getRangeAt(0); const pre = range.cloneRange(); pre.selectNodeContents(containerEl); pre.setEnd(range.startContainer, range.startOffset); return pre.toString().length; }
+function restoreCaret(containerEl,pos){ let nodes=[containerEl],node,found=false,charIndex=0,range=document.createRange(); range.setStart(containerEl,0); range.collapse(true); while(nodes.length>0){node=nodes.pop(); if(node.nodeType==3){const next=charIndex+node.length;if(!found && pos>=charIndex && pos<=next){range.setStart(node,pos-charIndex);range.collapse(true);found=true;break;}charIndex=next;}else{for(let i=node.childNodes.length-1;i>=0;i--) nodes.push(node.childNodes[i]);}} const sel=window.getSelection(); sel.removeAllRanges(); sel.addRange(range); }
 
-// Preserve caret position
-function saveCaret(containerEl) {
-  const selection = window.getSelection();
-  if(selection.rangeCount === 0) return null;
-  const range = selection.getRangeAt(0);
-  const preSelectionRange = range.cloneRange();
-  preSelectionRange.selectNodeContents(containerEl);
-  preSelectionRange.setEnd(range.startContainer, range.startOffset);
-  const start = preSelectionRange.toString().length;
-  return start;
-}
+// Main highlight
+function highlightText(){
+  const caretPos=saveCaret(editor);
+  const text=editor.innerText;
+  let annotations=[];
+  let html=escapeHtml(text);
 
-function restoreCaret(containerEl, pos) {
-  let nodeStack = [containerEl], node, foundStart=false, charIndex=0, range=document.createRange();
-  range.setStart(containerEl,0);
-  range.collapse(true);
-  while(nodeStack.length>0) {
-    node = nodeStack.pop();
-    if(node.nodeType==3){
-      const nextCharIndex = charIndex + node.length;
-      if(!foundStart && pos >= charIndex && pos <= nextCharIndex){
-        range.setStart(node, pos - charIndex);
-        range.collapse(true);
-        foundStart=true;
-        break;
-      }
-      charIndex = nextCharIndex;
-    } else {
-      let i=node.childNodes.length-1;i>=0;i--) nodeStack.push(node.childNodes[i]);
-    }
-  }
-  const sel = window.getSelection();
-  sel.removeAllRanges();
-  sel.addRange(range);
-}
-
-function highlightText() {
-  const caretPos = saveCaret(editor);
-  let text = escapeHtml(editor.innerText);
-  let html = text;
-  let annotations = [];
-  const appliedSet = new Set();
-
-  rules.forEach(rule => {
-    html = html.replace(rule.regex, match => {
-      if(appliedSet.has(match)) return match;
-      appliedSet.add(match);
-      annotations.push({text:match, message:rule.message, color:rule.color});
-      return `<span class="tooltip rule-${rule.color}" data-tooltip="${rule.message}">${match}</span>`;
+  // Highlight rules
+  rules.forEach(r=>{
+    html=html.replace(r.regex,match=>{
+      annotations.push({text:match,message:r.message,color:r.color});
+      return `<span class="tooltip rule-${r.color}" data-tooltip="${r.message}">${match}</span>`;
     });
   });
 
-  const misspelled = spellCheckWords(editor.innerText);
-  misspelled.forEach(word => {
-    const regex = new RegExp(`\\b${word}\\b`, 'g');
-    html = html.replace(regex, `<span class="tooltip rule-8" data-tooltip="Spelling mistake">${word}</span>`);
-    annotations.push({text:word, message:"Spelling mistake", color:8});
+  // Spell check
+  spellCheckWords(text).forEach(word=>{
+    const regex=new RegExp(`\\b${word}\\b`,'g');
+    html=html.replace(regex,`<span class="tooltip rule-8" data-tooltip="Spelling mistake">${word}</span>`);
+    annotations.push({text:word,message:"Spelling mistake",color:8});
   });
 
-  editor.innerHTML = html.replace(/\n/g,'<br>');
+  editor.innerHTML=html.replace(/\n/g,'<br>');
 
-  feedbackDiv.innerHTML = annotations.map(a => `<div style="background-color: rgba(${a.color*20},${255-a.color*20},${a.color*10},0.3); padding:3px 5px; margin-bottom:2px;">${a.message}: ${a.text}</div>`).join('');
+  feedbackDiv.innerHTML=annotations.map(a=>`<div style="background-color: rgba(${a.color*20},${255-a.color*20},${a.color*10},0.3); padding:3px 5px; margin-bottom:2px;">${a.message}: ${a.text}</div>`).join('');
+  wordCountP.textContent="Word count: "+(text.trim()?text.trim().split(/\s+/).length:0);
 
-  wordCountP.textContent = "Word count: " + (editor.innerText.trim() ? editor.innerText.trim().split(/\s+/).length : 0);
-  restoreCaret(editor, caretPos);
+  restoreCaret(editor,caretPos);
 }
 
-editor.addEventListener('input', highlightText);
-document.getElementById('analyzeBtn').addEventListener('click', highlightText);
-
+editor.addEventListener('input',highlightText);
+document.getElementById('analyzeBtn').addEventListener('click',highlightText);
 highlightText();
 </script>
 </body>
