@@ -28,7 +28,7 @@ button:hover { background:#005fa3; }
 .rule-8 { background-color: rgba(200,200,0,0.3); }
 .rule-9 { background-color: rgba(128,128,0,0.3); }
 .rule-10 { background-color: rgba(0,128,128,0.3); }
-.rule-11 { background-color: rgba(255,105,180,0.3); } /* new color for prepositions */
+.rule-11 { background-color: rgba(255,105,180,0.3); }
 
 /* Speech bubbles */
 .twain-bubble {
@@ -45,7 +45,11 @@ button:hover { background:#005fa3; }
   display: flex;
   align-items: flex-start;
   gap: 6px;
+  opacity: 0;
+  transform: translateY(20px) scale(0.98);
+  animation: fadeInScroll 1s ease forwards;
 }
+
 .twain-bubble .quote {
   font-size: 24px;
   line-height: 1;
@@ -55,6 +59,13 @@ button:hover { background:#005fa3; }
 /* Typewriter block cursor */
 @keyframes blink { 0%,50%,100% {opacity:1;} 25%,75% {opacity:0;} }
 #editor-caret { display:inline-block; width:8px; background:black; animation:blink 1s step-end infinite; vertical-align:text-bottom; }
+
+/* Speech bubble animation */
+@keyframes fadeInScroll {
+  0% { opacity: 0; transform: translateY(20px) scale(0.98) rotate(-1deg); filter: brightness(0.95); }
+  40% { opacity: 0.6; transform: translateY(10px) scale(1.01); filter: brightness(1.05); }
+  100% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); filter: brightness(1); }
+}
 
 /* Mobile responsiveness */
 @media (max-width: 600px) {
@@ -160,7 +171,7 @@ function highlightText(){
   feedbackDiv.innerHTML=[...seenRules].map(color=>{
     const rule=rules.find(r=>r.color===color);
     const ruleColor=getComputedStyle(document.querySelector(`.rule-${color}`)).backgroundColor;
-    return `<div class="twain-bubble" style="background-color:${ruleColor}; border-color:${ruleColor};">
+    return `<div class="twain-bubble" style="background-color:${ruleColor}; border-color:${ruleColor}; animation-delay:${Math.random()*0.5}s;">
       <span class="quote" style="color:${ruleColor};">“</span>
       <div><strong>Twain says:</strong> ${rule.message}</div>
       <span class="quote" style="color:${ruleColor};">”</span>
