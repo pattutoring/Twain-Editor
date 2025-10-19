@@ -1,12 +1,12 @@
-import React, { useState, useRef } from "https://esm.sh/react";
+import React, { useState, useRef, useEffect } from "https://esm.sh/react";
 
 export default function TwainStudentEditor() {
   const [text, setText] = useState("");
   const [feedback, setFeedback] = useState([]);
-  const [highlighted, setHighlighted] = useState("");
-  const editorRef = useRef();
+  const textareaRef = useRef();
+  const overlayRef = useRef();
 
-  const dictionary = ["the","and","to","of","a","in","is","it","you","that","he","was","for","on","are","with","as","I","his","they","be","at","one","have","this","from","or","had","by","but","not","word","words","sentence","write","plain","simple","short"];
+  const dictionary = ["the","and","to","of","a","in","is","it","you","that","he","was"];
 
   const rules = [
     { class:"fancy-word", message:'Avoid fancy words.', regex:/\b(utilize|commence|ascertain|ameliorate|endeavor|employ)\b/gi },
@@ -22,51 +22,45 @@ export default function TwainStudentEditor() {
     { class:"exaggeration", message:"Exaggeration is worse than understatement.", regex:/\b(nearly|extremely|tremendously|huge|gigantic)\b/gi }
   ];
 
-  const handleInput = (e) => {
-    setText(e.target.innerText);
+  // Generate highlighted HTML
+  const getHighlighted = (input) => {
+    let escaped = input.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    const tokens = escaped.split(/(\s+)/);
+    return tokens.map(token => {
+      let t = token;
+      rules.forEach(r => { if(r.regex.test(token)) t=`<span class="highlight ${r.class}" title="${r.message}">${token}</span>`; });
+      if(/^\w+$/.test(token) && !dictionary.includes(token.toLowerCase())) t=`<span class="highlight spell-error" title="Possible spelling error">${token}</span>`;
+      return t;
+    }).join("");
   };
 
+  const handleInput = (e) => {
+    setText(e.target.value);
+  };
+
+  useEffect(()=>{
+    if(overlayRef.current){
+      overlayRef.current.innerHTML = getHighlighted(text);
+    }
+  }, [text]);
+
   const analyze = () => {
-    let highlightedText = text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-    
-    // Highlight rules
-    rules.forEach(r => {
-      highlightedText = highlightedText.replace(r.regex, match => `<span class="highlight ${r.class}" title="${r.message}">${match}</span>`);
-    });
-
-    // Spell check
-    highlightedText = highlightedText.replace(/\b(\w+)\b/g, (match) => {
-      if (!dictionary.includes(match.toLowerCase())) {
-        return `<span class="highlight spell-error" title="Possible spelling error">${match}</span>`;
-      }
-      return match;
-    });
-
-    setHighlighted(highlightedText);
-
     const found = rules.filter(r => r.regex.test(text));
     setFeedback(found);
   };
 
   const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
-  const lines = text.split("\n").length;
 
   return (
-    <div>
-      <div className="editor-wrapper">
-        <div className="line-numbers">
-          {Array.from({length:lines}, (_,i) => i+1).join("\n")}
-        </div>
-        <div
-          ref={editorRef}
-          className="editor"
-          contentEditable
-          spellCheck={false}
-          onInput={handleInput}
-        >
-          {/* show plain text while typing */}
-          <div dangerouslySetInnerHTML={{__html: highlighted || text}} />
-        </div>
+    <div className="editor-container">
+      <div style={{position:'relative'}}>
+        <textarea
+          ref={textareaRef}
+          value={text}
+          onChange={handleInput}
+          placeholder="Write like Twain..."
+        />
+        <div ref={overlayRef} className="highlight-overlay"></div>
       </div>
 
       <div style={{display:"flex", justifyContent:"space-between", marginTop:"10px"}}>
@@ -74,7 +68,7 @@ export default function TwainStudentEditor() {
         <button onClick={analyze}>Analyze</button>
       </div>
 
-      {feedback.length > 0 && (
+      {feedback.length>0 && (
         <div className="feedback" dangerouslySetInnerHTML={{__html: feedback.map(f=>f.message).join("<br>")}} />
       )}
     </div>
