@@ -6,7 +6,7 @@ export default function TwainStudentEditor() {
   const textareaRef = useRef();
   const overlayRef = useRef();
 
-  const dictionary = ["the","and","to","of","a","in","is","it","you","that","he","was"];
+  const dictionary = ["the","and","to","of","a","in","is","it","you","that","he","was","be","have","this","for","on","with"];
 
   const rules = [
     { class:"fancy-word", message:'Avoid fancy words.', regex:/\b(utilize|commence|ascertain|ameliorate|endeavor|employ)\b/gi },
@@ -22,7 +22,8 @@ export default function TwainStudentEditor() {
     { class:"exaggeration", message:"Exaggeration is worse than understatement.", regex:/\b(nearly|extremely|tremendously|huge|gigantic)\b/gi }
   ];
 
-  // Generate highlighted HTML
+  const handleInput = (e) => setText(e.target.value);
+
   const getHighlighted = (input) => {
     let escaped = input.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
     const tokens = escaped.split(/(\s+)/);
@@ -34,11 +35,7 @@ export default function TwainStudentEditor() {
     }).join("");
   };
 
-  const handleInput = (e) => {
-    setText(e.target.value);
-  };
-
-  useEffect(()=>{
+  useEffect(() => {
     if(overlayRef.current){
       overlayRef.current.innerHTML = getHighlighted(text);
     }
@@ -50,17 +47,23 @@ export default function TwainStudentEditor() {
   };
 
   const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+  const lineCount = Math.max(text.split("\n").length,1);
 
   return (
-    <div className="editor-container">
-      <div style={{position:'relative'}}>
-        <textarea
-          ref={textareaRef}
-          value={text}
-          onChange={handleInput}
-          placeholder="Write like Twain..."
-        />
-        <div ref={overlayRef} className="highlight-overlay"></div>
+    <div>
+      <div className="editor-container">
+        <div className="line-numbers">
+          {Array.from({length: lineCount}, (_,i)=>i+1).join("\n")}
+        </div>
+        <div className="editor-wrapper">
+          <textarea
+            ref={textareaRef}
+            value={text}
+            onChange={handleInput}
+            placeholder="Write like Twain..."
+          />
+          <div ref={overlayRef} className="highlight-overlay"></div>
+        </div>
       </div>
 
       <div style={{display:"flex", justifyContent:"space-between", marginTop:"10px"}}>
